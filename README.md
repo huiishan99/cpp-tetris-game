@@ -20,7 +20,4 @@ Controls:
 
 Here’s a snapshot of the game in action:
 
-<img src=https://github.com/user-attachments/assets/194a6be6-b326-491e-b971-3d84a8ddcfa9 width=25% />
-
-
-![Screenshot 2024-08-26 225458](https://github.com/user-attachments/assets/90c511e3-9a2f-47ac-8ec0-c61af32a8bc6)
+<img src=https://github.com/user-attachments/assets/90c511e3-9a2f-47ac-8ec0-c61af32a8bc6 width=25% />
