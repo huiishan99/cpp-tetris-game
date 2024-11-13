@@ -1,6 +1,4 @@
-A simple implementation of the classic Tetris game, developed using C++ and the Raylib library. This project was created
-by following a step-by-step [tutorial](https://www.youtube.com/watch?v=wVYKG_ch4yM).
-
+A simple implementation of the classic Tetris game, developed using C++ and the Raylib library. 
 ### Features
 
 - Classic Tetris gameplay
