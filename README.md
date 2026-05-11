@@ -1,6 +1,6 @@
-# C++ Console Tetris Game
+# C++ Tetris Game
 
-A small Tetris game written in C++ for the Windows console.
+A small Tetris game written in C++ with a native Windows GUI.
 
 This version does **not** use Raylib. It only needs a C++ compiler, so there is
 no graphics-library setup.
@@ -11,7 +11,7 @@ no graphics-library setup.
 - Score tracking
 - Next-block preview
 - Soft drop and instant drop
-- Simple console rendering
+- Native Windows window rendering
 - Small Windows beep sounds for rotate and row clear
 
 ## Controls
@@ -33,7 +33,7 @@ no graphics-library setup.
 - VS Code is optional
 
 You do not need Raylib, `C:\raylib`, fonts, image assets, or audio files for
-this console version.
+this Windows GUI version.
 
 ## Check Whether `g++` Is Installed
 
@@ -60,7 +60,7 @@ cd C:\dev\cpp-tetris-game
 Build:
 
 ```powershell
-g++ -std=c++17 -Wall -Wextra src\*.cpp -o main.exe
+g++ -std=c++17 -Wall -Wextra src\*.cpp -mwindows -lgdi32 -luser32 -o main.exe
 ```
 
 Or use the included batch file:
@@ -68,6 +68,9 @@ Or use the included batch file:
 ```powershell
 .\build.bat
 ```
+
+`build.bat` uses `g++` when it is available. If you run it from a Visual Studio
+Developer Command Prompt, it can also build with `cl`.
 
 Run:
 
@@ -80,13 +83,13 @@ Run:
 1. Open `main.code-workspace` in VS Code.
 2. Press `Ctrl + Shift + B`.
 3. Choose `build debug` or `build release`.
-4. Run `.\main.exe`, or use the `Run Console Tetris` launch configuration.
+4. Run `.\main.exe`, or use the `Run Windows Tetris` launch configuration.
 
 ## Project Structure
 
 ```text
 src/
-  main.cpp       Console input, drawing, and game loop
+  main.cpp       Windows GUI, drawing, input, and game loop
   game.cpp       Game state, scoring, movement, rotation, beep sounds
   grid.cpp       Tetris board and row clearing
   block.cpp      Shared block behavior
@@ -101,7 +104,7 @@ Rebuild the project first. Source code changes do not update `main.exe`
 automatically.
 
 ```powershell
-g++ -std=c++17 -Wall -Wextra src\*.cpp -o main.exe
+g++ -std=c++17 -Wall -Wextra src\*.cpp -mwindows -lgdi32 -luser32 -o main.exe
 .\main.exe
 ```
 
@@ -114,7 +117,7 @@ C++ compiler, then reopen PowerShell and try:
 g++ --version
 ```
 
-### The game flickers
+### The window does not open
 
-This is a simple console renderer, so some flicker is normal in older terminals.
-Windows Terminal usually looks better than the classic console window.
+Make sure the build succeeded and `main.exe` was updated. If the compiler is not
+installed, `build.bat` will fail before creating the GUI executable.
