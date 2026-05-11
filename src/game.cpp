@@ -1,4 +1,5 @@
 #include "game.h"
+#include <windows.h>
 
 Game::Game()
 {
@@ -9,19 +10,6 @@ Game::Game()
     nextBlock = GetRandomBlock();
     gameOver = false;
     score = 0;
-    InitAudioDevice();
-    music = LoadMusicStream("Sounds/music.mp3");
-    PlayMusicStream(music);
-    rotateSound = LoadSound("Sounds/rotate.mp3");
-    clearSound = LoadSound("Sounds/clear.mp3");
-}
-
-Game::~Game()
-{
-    UnloadSound(rotateSound);
-    UnloadSound(clearSound);
-    UnloadMusicStream(music);
-    CloseAudioDevice();
 }
 
 Block Game::GetRandomBlock()
@@ -42,46 +30,50 @@ std::vector<Block> Game ::GetAllBlocks()
     return {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
 }
 
-void Game::Draw()
+const int (&Game::GetGrid() const)[20][10]
 {
-    grid.Draw();
-    currentBlock.Draw(11, 11);
-    switch (nextBlock.id)
-    {
-    case 3:
-        nextBlock.Draw(255, 290);
-        break;
-    case 4:
-        nextBlock.Draw(255, 280);
-        break;
-    default:
-        nextBlock.Draw(270, 270);
-        break;
-    }
+    return grid.grid;
 }
 
-void Game::HandleInput()
+std::vector<Position> Game::GetCurrentBlockCells()
 {
-    int keyPressed = GetKeyPressed();
-    if (gameOver && keyPressed != 0)
+    return currentBlock.GetCellPositions();
+}
+
+int Game::GetNextBlockId() const
+{
+    return nextBlock.id;
+}
+
+void Game::HandleInput(int key)
+{
+    if (gameOver && key != 0)
     {
         gameOver = false;
         Reset();
+        return;
     }
-    switch (keyPressed)
+    switch (key)
     {
-    case KEY_LEFT:
+    case 'a':
+    case 'A':
         MoveBlockLeft();
         break;
-    case KEY_RIGHT:
+    case 'd':
+    case 'D':
         MoveBlockRight();
         break;
-    case KEY_DOWN:
+    case 's':
+    case 'S':
         MoveBlockDown();
         UpdateScore(0, 1);
         break;
-    case KEY_UP:
+    case 'w':
+    case 'W':
         RotateBlock();
+        break;
+    case ' ':
+        DropBlock();
         break;
     }
 }
@@ -123,6 +115,26 @@ void Game::MoveBlockDown()
     }
 }
 
+void Game::DropBlock()
+{
+    if (!gameOver)
+    {
+        int rowsDropped = 0;
+        while (true)
+        {
+            currentBlock.Move(1, 0);
+            if (IsBlockOutside() || BlockFits() == false)
+            {
+                currentBlock.Move(-1, 0);
+                LockBlock();
+                break;
+            }
+            rowsDropped++;
+        }
+        UpdateScore(0, rowsDropped * 2);
+    }
+}
+
 bool Game::IsBlockOutside()
 {
     std::vector<Position> tiles = currentBlock.GetCellPositions();
@@ -147,7 +159,7 @@ void Game::RotateBlock()
         }
         else
         {
-            PlaySound(rotateSound);
+            Beep(880, 25);
         }
     }
 }
@@ -168,7 +180,7 @@ void Game::LockBlock()
     int rowsCleared = grid.ClearFullRows();
     if (rowsCleared > 0)
     {
-        PlaySound(clearSound);
+        Beep(660, 60);
         UpdateScore(rowsCleared, 0);
     }
 }
