@@ -1,9 +1,9 @@
 #include "game.h"
-#include <random>
 
 Game::Game()
 {
     grid = Grid();
+    randomGenerator = std::mt19937(std::random_device{}());
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
@@ -30,7 +30,8 @@ Block Game::GetRandomBlock()
     {
         blocks = GetAllBlocks();
     }
-    int randomIndex = rand() % blocks.size();
+    std::uniform_int_distribution<int> distribution(0, static_cast<int>(blocks.size()) - 1);
+    int randomIndex = distribution(randomGenerator);
     Block block = blocks[randomIndex];
     blocks.erase(blocks.begin() + randomIndex);
     return block;
@@ -206,6 +207,9 @@ void Game::UpdateScore(int LinesCleared, int moveDownPoints)
         break;
     case 3:
         score += 500;
+        break;
+    case 4:
+        score += 800;
         break;
     default:
         break;

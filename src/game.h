@@ -1,6 +1,7 @@
 #pragma once
 #include "grid.h"
-#include "blocks.cpp"
+#include "blocks.h"
+#include <random>
 
 class Game
 {
@@ -29,6 +30,7 @@ private:
     std::vector<Block> blocks;
     Block currentBlock;
     Block nextBlock;
+    std::mt19937 randomGenerator;
     Sound rotateSound;
     Sound clearSound;
 };
