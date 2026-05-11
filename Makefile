@@ -1,5 +1,6 @@
 CXX ?= g++
-CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2
+CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2 -mwindows
+LDLIBS ?= -lgdi32 -luser32
 TARGET ?= main.exe
 SOURCES := $(wildcard src/*.cpp)
 
@@ -8,7 +9,7 @@ SOURCES := $(wildcard src/*.cpp)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES)
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(SOURCES) $(LDLIBS) -o $(TARGET)
 
 run: $(TARGET)
 	./$(TARGET)

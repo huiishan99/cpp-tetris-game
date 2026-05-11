@@ -12,6 +12,7 @@ public:
     void MoveBlockDown();
     const int (&GetGrid() const)[20][10];
     std::vector<Position> GetCurrentBlockCells();
+    int GetCurrentBlockId() const;
     int GetNextBlockId() const;
     bool gameOver;
     int score;
