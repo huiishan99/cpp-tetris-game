@@ -84,6 +84,25 @@ void DrawTextLine(HDC hdc, int x, int y, const std::string &text, int size = 24,
     DeleteObject(font);
 }
 
+void DrawTextCentered(HDC hdc, int left, int right, int y, const std::string &text,
+                      int size, COLORREF color, int weight = FW_NORMAL)
+{
+    HFONT font = CreateFontA(size, 0, 0, 0, weight, FALSE, FALSE, FALSE,
+                             ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Segoe UI");
+    HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
+    SetBkMode(hdc, TRANSPARENT);
+    SetTextColor(hdc, color);
+
+    SIZE textSize = {};
+    GetTextExtentPoint32A(hdc, text.c_str(), static_cast<int>(text.size()), &textSize);
+    int x = left + (right - left - textSize.cx) / 2;
+    TextOutA(hdc, x, y, text.c_str(), static_cast<int>(text.size()));
+
+    SelectObject(hdc, oldFont);
+    DeleteObject(font);
+}
+
 void FillRectColor(HDC hdc, int left, int top, int right, int bottom, COLORREF color)
 {
     HBRUSH brush = CreateSolidBrush(color);
@@ -241,23 +260,33 @@ std::string GetClearLabel(int clearedLines)
 
 void DrawStatusPanel(HDC hdc, int x, int y, int width)
 {
-    std::string status = "PLAYING";
-    COLORREF statusColor = RGB(122, 214, 176);
+    std::string status = "READY";
+    COLORREF statusColor = RGB(249, 214, 124);
     if (game.IsGameOver())
     {
         status = "GAME OVER";
         statusColor = RGB(240, 101, 95);
+    }
+    else if (!game.IsStarted())
+    {
+        status = "READY";
+        statusColor = RGB(249, 214, 124);
     }
     else if (game.IsPaused())
     {
         status = "PAUSED";
         statusColor = RGB(241, 194, 100);
     }
+    else
+    {
+        status = "PLAYING";
+        statusColor = RGB(122, 214, 176);
+    }
 
     FillRoundRectColor(hdc, x, y, x + width, y + 78, 8,
                        RGB(31, 35, 36), RGB(61, 70, 62));
     DrawTextLine(hdc, x + 14, y + 10, "Status", 16, RGB(170, 178, 158), FW_NORMAL);
-    if (game.GetLastClearLines() > 0 && !game.IsGameOver() && !game.IsPaused())
+    if (game.GetLastClearLines() > 0 && game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
     {
         std::string clearText = GetClearLabel(game.GetLastClearLines());
         std::string scoreText = "+" + std::to_string(game.GetLastClearScore());
@@ -268,6 +297,47 @@ void DrawStatusPanel(HDC hdc, int x, int y, int width)
     else
     {
         DrawTextLine(hdc, x + 14, y + 34, status, 24, statusColor, FW_BOLD);
+    }
+}
+
+void DrawOverlayPanel(HDC hdc, const std::string &title, const std::string &action,
+                      const std::string &detail, COLORREF accent)
+{
+    int left = BOARD_LEFT + 22;
+    int right = BOARD_LEFT + CELL_SIZE * 10 - 22;
+    int top = BOARD_TOP + 164;
+    int bottom = BOARD_TOP + 394;
+
+    FillRoundRectColor(hdc, left + 5, top + 7, right + 5, bottom + 7, 12,
+                       RGB(10, 12, 12), RGB(10, 12, 12));
+    FillRoundRectColor(hdc, left, top, right, bottom, 12,
+                       RGB(31, 35, 36), AdjustColor(accent, -65));
+    FillRectColor(hdc, left + 18, top + 16, right - 18, top + 20, accent);
+
+    DrawTextCentered(hdc, left, right, top + 44, title, 34, RGB(248, 244, 225), FW_BOLD);
+    DrawTextCentered(hdc, left, right, top + 96, action, 18, accent, FW_BOLD);
+    DrawTextCentered(hdc, left, right, top + 138, detail, 17, RGB(170, 178, 158), FW_NORMAL);
+}
+
+void DrawStateOverlay(HDC hdc)
+{
+    if (game.IsGameOver())
+    {
+        DrawOverlayPanel(hdc, "GAME OVER", "PRESS ANY KEY",
+                         "Score " + std::to_string(game.GetScore()) + "   Best " + std::to_string(game.GetHighScore()),
+                         RGB(240, 101, 95));
+    }
+    else if (!game.IsStarted())
+    {
+        DrawOverlayPanel(hdc, "READY", "PRESS ANY KEY",
+                         "Best " + std::to_string(game.GetHighScore()),
+                         RGB(249, 214, 124));
+    }
+    else if (game.IsPaused())
+    {
+        DrawOverlayPanel(hdc, "PAUSED", "PRESS P",
+                         "Score " + std::to_string(game.GetScore()),
+                         RGB(241, 194, 100));
     }
 }
 
@@ -335,6 +405,7 @@ void DrawGame(HDC hdc)
     DrawBlockPreview(hdc, panelX, BOARD_TOP + 350, panelWidth, 126,
                      "Next", game.GetNextBlockCells(), game.GetNextBlockId(), false);
     DrawStatusPanel(hdc, panelX, BOARD_TOP + 486, panelWidth);
+    DrawStateOverlay(hdc);
 }
 
 void HandleGameKey(HWND hwnd, WPARAM key)
@@ -375,7 +446,7 @@ void HandleGameKey(HWND hwnd, WPARAM key)
         input = static_cast<int>(key);
         break;
     default:
-        input = game.IsGameOver() ? 'r' : 0;
+        input = (!game.IsStarted() || game.IsGameOver()) ? 'r' : 0;
         break;
     }
 

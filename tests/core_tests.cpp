@@ -118,6 +118,7 @@ void TestRotationKickAllowsIBlockToRotateAtTop()
     Game game{IBlock(), OBlock()};
     std::vector<Position> initialCells = game.GetCurrentBlockCells();
 
+    game.Start();
     game.HandleInput('w');
     std::vector<Position> rotatedCells = game.GetCurrentBlockCells();
 
@@ -129,11 +130,27 @@ void TestRotationKickAllowsIBlockToRotateAtTop()
     }
 }
 
+void TestStartGateBlocksMovementUntilInputStarts()
+{
+    Game game;
+    std::vector<Position> initialCells = game.GetCurrentBlockCells();
+
+    Expect(!game.IsStarted(), "new game waits on the start screen");
+    Expect(!game.MoveBlockDown(), "automatic drop is blocked before start");
+    Expect(HasSameCells(initialCells, game.GetCurrentBlockCells()), "start screen keeps current block still");
+
+    game.HandleInput('a');
+
+    Expect(game.IsStarted(), "first gameplay input starts the game");
+    Expect(HasSameCells(initialCells, game.GetCurrentBlockCells()), "first start input does not also move the block");
+}
+
 void TestSoftDropScoresOnePoint()
 {
     Game game;
     int startingScore = game.GetScore();
 
+    game.Start();
     game.HandleInput('s');
 
     Expect(game.GetScore() == startingScore + 1, "soft drop scores one point");
@@ -145,6 +162,7 @@ void TestBlockedSoftDropDoesNotScore()
     block.Move(18, 0);
     Game game{block, IBlock()};
 
+    game.Start();
     game.HandleInput('s');
 
     Expect(game.GetScore() == 0, "blocked soft drop does not score");
@@ -155,12 +173,14 @@ void TestHighScoreSurvivesRestart()
 {
     Game game;
 
+    game.Start();
     game.HandleInput('s');
     Expect(game.GetScore() == 1, "soft drop creates a score for high score tracking");
     Expect(game.GetHighScore() == 1, "high score updates when score increases");
 
     game.Restart();
 
+    Expect(game.IsStarted(), "restart immediately starts a new game");
     Expect(game.GetScore() == 0, "restart clears current score");
     Expect(game.GetHighScore() == 1, "restart keeps session high score");
 }
@@ -188,6 +208,7 @@ void TestPauseStopsAutomaticDrop()
     Game game;
     std::vector<Position> initialCells = game.GetCurrentBlockCells();
 
+    game.Start();
     game.HandleInput('p');
     game.MoveBlockDown();
 
@@ -224,6 +245,7 @@ void TestHoldStoresCurrentBlockOncePerDrop()
     int startingBlockId = game.GetCurrentBlockId();
     int startingNextBlockId = game.GetNextBlockId();
 
+    game.Start();
     Expect(game.CanHold(), "hold is available before use");
     game.HandleInput('c');
 
@@ -252,6 +274,7 @@ void TestLineClearFeedbackAndComboReset()
     }
 
     Game game{IBlock(), OBlock(), grid};
+    game.Start();
     game.HandleInput(' ');
 
     Expect(game.GetLastClearLines() == 1, "line clear feedback stores cleared line count");
@@ -285,6 +308,7 @@ int main()
     TestGridClearsMultipleRows();
     TestBlockRotationCycles();
     TestRotationKickAllowsIBlockToRotateAtTop();
+    TestStartGateBlocksMovementUntilInputStarts();
     TestSoftDropScoresOnePoint();
     TestBlockedSoftDropDoesNotScore();
     TestHighScoreSurvivesRestart();

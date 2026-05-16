@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add game state overlays
+
+- Changed: Added a start-gated game state, `Game::Start`, `Game::IsStarted`,
+  start/pause/game-over overlay panels, READY status display, and core tests
+  that verify automatic drop is blocked before start.
+- Why: Make the game feel like a complete playable experience instead of
+  dropping immediately when the window opens.
+- Risk: The first gameplay key now starts the game without also moving the
+  block; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune overlay spacing and text metrics after another Windows
+  visual pass.
+
 ### 2026-05-16 - Persist best score
 
 - Changed: Added `src/high_score.h`, `src/high_score.cpp`, high-score loading

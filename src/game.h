@@ -11,6 +11,7 @@ public:
     Game(const Block &startingBlock, const Block &upcomingBlock);
     Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid);
     void HandleInput(int key);
+    void Start();
     void Restart();
     bool MoveBlockDown();
     const int (&GetGrid() const)[20][10];
@@ -30,6 +31,7 @@ public:
     int GetCombo() const;
     int GetLevel() const;
     int GetDropIntervalMs() const;
+    bool IsStarted() const;
     bool IsGameOver() const;
     bool IsPaused() const;
     bool HasHeldBlock() const;
@@ -64,6 +66,7 @@ private:
     Block heldBlock;
     std::mt19937 randomGenerator;
     bool gameOver;
+    bool started;
     bool paused;
     bool hasHeldBlock;
     bool holdUsed;

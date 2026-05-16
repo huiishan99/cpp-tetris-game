@@ -29,6 +29,7 @@ Game::Game()
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
     gameOver = false;
+    started = false;
     paused = false;
     hasHeldBlock = false;
     holdUsed = false;
@@ -48,6 +49,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     currentBlock = startingBlock;
     nextBlock = upcomingBlock;
     gameOver = false;
+    started = false;
     paused = false;
     hasHeldBlock = false;
     holdUsed = false;
@@ -67,6 +69,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     currentBlock = startingBlock;
     nextBlock = upcomingBlock;
     gameOver = false;
+    started = false;
     paused = false;
     hasHeldBlock = false;
     holdUsed = false;
@@ -202,6 +205,11 @@ int Game::GetDropIntervalMs() const
     return CalculateDropIntervalMs(GetLevel());
 }
 
+bool Game::IsStarted() const
+{
+    return started;
+}
+
 bool Game::IsGameOver() const
 {
     return gameOver;
@@ -219,7 +227,7 @@ bool Game::HasHeldBlock() const
 
 bool Game::CanHold() const
 {
-    return !gameOver && !paused && !holdUsed;
+    return started && !gameOver && !paused && !holdUsed;
 }
 
 int Game::CalculateLineClearScore(int completedLines)
@@ -271,6 +279,12 @@ void Game::HandleInput(int key)
         return;
     }
 
+    if (!started && key != 0)
+    {
+        Start();
+        return;
+    }
+
     if (key == 'p' || key == 'P')
     {
         TogglePause();
@@ -313,14 +327,24 @@ void Game::HandleInput(int key)
     }
 }
 
+void Game::Start()
+{
+    if (!gameOver)
+    {
+        started = true;
+        paused = false;
+    }
+}
+
 void Game::Restart()
 {
     Reset();
+    Start();
 }
 
 void Game::MoveBlockLeft()
 {
-    if (!gameOver && !paused)
+    if (started && !gameOver && !paused)
     {
         currentBlock.Move(0, -1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -332,7 +356,7 @@ void Game::MoveBlockLeft()
 
 void Game::MoveBlockRight()
 {
-    if (!gameOver && !paused)
+    if (started && !gameOver && !paused)
     {
         currentBlock.Move(0, 1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -344,7 +368,7 @@ void Game::MoveBlockRight()
 
 bool Game::MoveBlockDown()
 {
-    if (!gameOver && !paused)
+    if (started && !gameOver && !paused)
     {
         currentBlock.Move(1, 0);
         if (IsBlockOutside() || BlockFits() == false)
@@ -360,7 +384,7 @@ bool Game::MoveBlockDown()
 
 void Game::DropBlock()
 {
-    if (!gameOver && !paused)
+    if (started && !gameOver && !paused)
     {
         int rowsDropped = 0;
         while (true)
@@ -428,7 +452,7 @@ bool Game::IsBlockOutside(const Block &block) const
 
 void Game::RotateBlock()
 {
-    if (!gameOver && !paused)
+    if (started && !gameOver && !paused)
     {
         currentBlock.Rotate();
         if (!TryWallKick())
@@ -468,6 +492,7 @@ void Game::LockBlock()
     if (BlockFits() == false)
     {
         gameOver = true;
+        started = true;
         paused = false;
     }
     nextBlock = GetRandomBlock();
@@ -536,6 +561,7 @@ void Game::Reset()
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
     gameOver = false;
+    started = false;
     paused = false;
     hasHeldBlock = false;
     holdUsed = false;

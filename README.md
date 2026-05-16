@@ -10,6 +10,7 @@ no graphics-library setup.
 - Classic Tetris movement
 - Score tracking
 - Persistent best score tracking
+- Start, pause, and game-over overlay panels
 - Line count and level progression
 - Line-clear feedback and combo counter
 - Hold-block swap
@@ -26,6 +27,7 @@ no graphics-library setup.
 
 | Key | Action |
 | --- | --- |
+| Any non-Q key on start screen | Start |
 | Left Arrow or A | Move block left |
 | Right Arrow or D | Move block right |
 | Down Arrow or S | Soft drop |
@@ -33,7 +35,7 @@ no graphics-library setup.
 | Space | Drop block instantly |
 | C or Shift | Hold or swap block |
 | P | Pause or resume |
-| Any key after game over | Restart |
+| Any non-Q key after game over | Restart |
 | Q | Quit |
 
 ## Scoring and Pace
