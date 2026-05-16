@@ -11,12 +11,16 @@ const int BOARD_TOP = 64;
 const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
 const int FLASH_TIMER_ID = 2;
+const int LEVEL_TIMER_ID = 3;
 const int CLEAR_FLASH_DURATION_MS = 320;
+const int LEVEL_FLASH_DURATION_MS = 900;
 const char *HIGH_SCORE_FILE = "tetris_highscore.txt";
 
 Game game;
 int observedClearEventId = 0;
+int observedLevelUpEventId = 0;
 DWORD clearFlashStartedAt = 0;
+DWORD levelFlashStartedAt = 0;
 
 COLORREF GetBlockColor(int blockId)
 {
@@ -370,7 +374,16 @@ void DrawStatusPanel(HDC hdc, int x, int y, int width)
     FillRoundRectColor(hdc, x, y, x + width, y + 78, 8,
                        RGB(31, 35, 36), RGB(61, 70, 62));
     DrawTextLine(hdc, x + 14, y + 10, "Status", 16, RGB(170, 178, 158), FW_NORMAL);
-    if (game.GetLastClearLines() > 0 && game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
+    if (observedLevelUpEventId > 0 &&
+        GetTickCount() - levelFlashStartedAt < static_cast<DWORD>(LEVEL_FLASH_DURATION_MS) &&
+        game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
+    {
+        DrawTextLine(hdc, x + 14, y + 30, "LEVEL UP", 22, RGB(122, 214, 176), FW_BOLD);
+        DrawTextLine(hdc, x + 14, y + 56,
+                     "Level " + std::to_string(game.GetLastLevelReached()),
+                     16, RGB(170, 178, 158), FW_NORMAL);
+    }
+    else if (game.GetLastClearLines() > 0 && game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
     {
         std::string clearText = GetClearLabel(game.GetLastClearLines());
         std::string scoreText = "+" + std::to_string(game.GetLastClearScore());
@@ -447,6 +460,17 @@ bool IsClearFlashReadyToFinish()
     return elapsed >= static_cast<DWORD>(CLEAR_FLASH_DURATION_MS);
 }
 
+bool IsLevelFlashActive()
+{
+    if (observedLevelUpEventId == 0)
+    {
+        return false;
+    }
+
+    DWORD elapsed = GetTickCount() - levelFlashStartedAt;
+    return elapsed < static_cast<DWORD>(LEVEL_FLASH_DURATION_MS);
+}
+
 void UpdateClearFlash(HWND hwnd)
 {
     int clearEventId = game.GetClearEventId();
@@ -458,6 +482,20 @@ void UpdateClearFlash(HWND hwnd)
             clearFlashStartedAt = GetTickCount();
             KillTimer(hwnd, TIMER_ID);
             SetTimer(hwnd, FLASH_TIMER_ID, 45, nullptr);
+        }
+    }
+}
+
+void UpdateLevelFlash(HWND hwnd)
+{
+    int levelUpEventId = game.GetLevelUpEventId();
+    if (levelUpEventId != observedLevelUpEventId)
+    {
+        observedLevelUpEventId = levelUpEventId;
+        if (levelUpEventId > 0)
+        {
+            levelFlashStartedAt = GetTickCount();
+            SetTimer(hwnd, LEVEL_TIMER_ID, 45, nullptr);
         }
     }
 }
@@ -606,6 +644,7 @@ void HandleGameKey(HWND hwnd, WPARAM key)
     {
         game.HandleInput(input);
         UpdateClearFlash(hwnd);
+        UpdateLevelFlash(hwnd);
         InvalidateRect(hwnd, nullptr, FALSE);
     }
 }
@@ -632,8 +671,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             return 0;
         }
 
+        if (wParam == LEVEL_TIMER_ID)
+        {
+            if (!IsLevelFlashActive())
+            {
+                KillTimer(hwnd, LEVEL_TIMER_ID);
+            }
+            InvalidateRect(hwnd, nullptr, FALSE);
+            return 0;
+        }
+
         game.MoveBlockDown();
         UpdateClearFlash(hwnd);
+        UpdateLevelFlash(hwnd);
         if (!game.IsLineClearPending())
         {
             SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
@@ -663,6 +713,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_ID);
         KillTimer(hwnd, FLASH_TIMER_ID);
+        KillTimer(hwnd, LEVEL_TIMER_ID);
         PostQuitMessage(0);
         return 0;
     default:

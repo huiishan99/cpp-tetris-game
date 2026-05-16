@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add level-up feedback
+
+- Changed: Added level-up event tracking, reached-level state, a level-up sound
+  cue, a short status-panel level-up flash, and a core test for crossing the
+  ten-line level threshold.
+- Why: Make speed increases visible and audible instead of only changing the
+  small Level number in the side panel.
+- Risk: The Win32 flash timing and beep feel need a Windows play pass; local
+  verification covers the portable rules and event state.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune the status-panel priority if level-up and Tetris feedback
+  should be shown together rather than one after the other.
+
 ### 2026-05-16 - Add cross-platform CI
 
 - Changed: Added a GitHub Actions workflow that configures CMake, builds the

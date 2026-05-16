@@ -31,7 +31,6 @@ Game::Game()
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
     FillUpcomingBlocks();
-    FillUpcomingBlocks();
     gameOver = false;
     started = false;
     paused = false;
@@ -45,6 +44,8 @@ Game::Game()
     lastClearScore = 0;
     clearEventId = 0;
     combo = 0;
+    levelUpEventId = 0;
+    lastLevelReached = 1;
 }
 
 Game::Game(const Block &startingBlock, const Block &upcomingBlock)
@@ -68,6 +69,8 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     lastClearScore = 0;
     clearEventId = 0;
     combo = 0;
+    levelUpEventId = 0;
+    lastLevelReached = 1;
 }
 
 Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid)
@@ -91,6 +94,38 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     lastClearScore = 0;
     clearEventId = 0;
     combo = 0;
+    levelUpEventId = 0;
+    lastLevelReached = CalculateLevel(linesCleared);
+}
+
+Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid, int initialLinesCleared)
+{
+    if (initialLinesCleared < 0)
+    {
+        initialLinesCleared = 0;
+    }
+
+    grid = initialGrid;
+    randomGenerator = std::mt19937(0);
+    blocks = GetAllBlocks();
+    currentBlock = startingBlock;
+    nextBlock = upcomingBlock;
+    FillUpcomingBlocks();
+    gameOver = false;
+    started = false;
+    paused = false;
+    lineClearPending = false;
+    hasHeldBlock = false;
+    holdUsed = false;
+    score = 0;
+    highScore = 0;
+    linesCleared = initialLinesCleared;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    clearEventId = 0;
+    combo = 0;
+    levelUpEventId = 0;
+    lastLevelReached = CalculateLevel(linesCleared);
 }
 
 Block Game::GetRandomBlock()
@@ -246,6 +281,16 @@ int Game::GetClearEventId() const
 int Game::GetCombo() const
 {
     return combo;
+}
+
+int Game::GetLevelUpEventId() const
+{
+    return levelUpEventId;
+}
+
+int Game::GetLastLevelReached() const
+{
+    return lastLevelReached;
 }
 
 int Game::GetLevel() const
@@ -693,8 +738,10 @@ void Game::Reset()
 {
     grid.Initialize();
     blocks = GetAllBlocks();
+    upcomingBlocks.clear();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
+    FillUpcomingBlocks();
     gameOver = false;
     started = false;
     paused = false;
@@ -708,13 +755,23 @@ void Game::Reset()
     lastClearedRows.clear();
     clearEventId = 0;
     combo = 0;
+    levelUpEventId = 0;
+    lastLevelReached = 1;
 }
 
 void Game::UpdateScore(int linesCompleted, int moveDownPoints)
 {
+    int previousLevel = GetLevel();
     score += CalculateLineClearScore(linesCompleted);
     linesCleared += linesCompleted;
     score += moveDownPoints;
+    int currentLevel = GetLevel();
+    if (currentLevel > previousLevel)
+    {
+        lastLevelReached = currentLevel;
+        levelUpEventId++;
+        PlayLevelUpSound();
+    }
     UpdateHighScore();
 }
 

@@ -10,6 +10,7 @@ public:
     Game();
     Game(const Block &startingBlock, const Block &upcomingBlock);
     Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid);
+    Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid, int initialLinesCleared);
     void HandleInput(int key);
     void Start();
     void Restart();
@@ -34,6 +35,8 @@ public:
     const std::vector<int> &GetLastClearedRows() const;
     int GetClearEventId() const;
     int GetCombo() const;
+    int GetLevelUpEventId() const;
+    int GetLastLevelReached() const;
     int GetLevel() const;
     int GetDropIntervalMs() const;
     bool IsStarted() const;
@@ -90,4 +93,6 @@ private:
     std::vector<int> lastClearedRows;
     int clearEventId;
     int combo;
+    int levelUpEventId;
+    int lastLevelReached;
 };

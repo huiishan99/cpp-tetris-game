@@ -343,6 +343,28 @@ void TestLineClearFeedbackAndComboReset()
     Expect(game.GetCombo() == 0, "non-clear lock resets combo");
 }
 
+void TestLevelUpEventOnLineThreshold()
+{
+    Grid grid;
+    for (int column = 0; column < 10; column++)
+    {
+        if (column < 3 || column > 6)
+        {
+            grid.grid[19][column] = 7;
+        }
+    }
+
+    Game game{IBlock(), OBlock(), grid, 9};
+    game.Start();
+    int startingLevelEvent = game.GetLevelUpEventId();
+    game.HandleInput(' ');
+
+    Expect(game.GetLinesCleared() == 10, "line clear can cross a level threshold");
+    Expect(game.GetLevel() == 2, "level increases after ten cleared lines");
+    Expect(game.GetLastLevelReached() == 2, "level-up feedback stores the reached level");
+    Expect(game.GetLevelUpEventId() == startingLevelEvent + 1, "level-up feedback increments event id");
+}
+
 void TestLevelAndDropSpeedProgression()
 {
     Expect(Game::CalculateLineClearScore(0) == 0, "zero lines score zero line-clear points");
@@ -373,6 +395,7 @@ int main()
     TestUpcomingBlockQueueAdvances();
     TestHoldStoresCurrentBlockOncePerDrop();
     TestLineClearFeedbackAndComboReset();
+    TestLevelUpEventOnLineThreshold();
     TestLevelAndDropSpeedProgression();
 
     std::cout << "All core tests passed." << std::endl;

@@ -12,6 +12,7 @@ no graphics-library setup.
 - Persistent best score tracking
 - Start, pause, and game-over overlay panels
 - Line count and level progression
+- Level-up status feedback
 - Line-clear feedback and combo counter
 - Delayed line-clear flash animation
 - Hold-block swap

@@ -6,5 +6,6 @@ void PlayHardDropSound();
 void PlayHoldSound();
 void PlayRotateSound();
 void PlayLineClearSound();
+void PlayLevelUpSound();
 void PlayPauseSound();
 void PlayGameOverSound();

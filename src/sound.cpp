@@ -46,6 +46,14 @@ void PlayLineClearSound()
 #endif
 }
 
+void PlayLevelUpSound()
+{
+#ifdef _WIN32
+    Beep(740, 45);
+    Beep(980, 65);
+#endif
+}
+
 void PlayPauseSound()
 {
 #ifdef _WIN32
