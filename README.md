@@ -13,6 +13,7 @@ no graphics-library setup.
 - Hold-block swap
 - Next-block preview
 - Ghost landing preview
+- Rotation kick assist near walls and the spawn top
 - Pause and resume
 - Soft drop and instant drop
 - Polished dark UI with block preview and status panels

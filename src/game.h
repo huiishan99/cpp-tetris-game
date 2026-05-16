@@ -8,6 +8,7 @@ class Game
 {
 public:
     Game();
+    Game(const Block &startingBlock, const Block &upcomingBlock);
     void HandleInput(int key);
     void MoveBlockDown();
     const int (&GetGrid() const)[20][10];
@@ -40,6 +41,7 @@ private:
     bool IsBlockOutside() const;
     bool IsBlockOutside(const Block &block) const;
     void RotateBlock();
+    bool TryWallKick();
     void LockBlock();
     bool BlockFits() const;
     bool BlockFits(const Block &block) const;

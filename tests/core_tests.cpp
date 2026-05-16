@@ -110,6 +110,22 @@ void TestBlockRotationCycles()
     }
 }
 
+void TestRotationKickAllowsIBlockToRotateAtTop()
+{
+    Game game{IBlock(), OBlock()};
+    std::vector<Position> initialCells = game.GetCurrentBlockCells();
+
+    game.HandleInput('w');
+    std::vector<Position> rotatedCells = game.GetCurrentBlockCells();
+
+    Expect(!HasSameCells(initialCells, rotatedCells), "rotation kick allows I block to rotate near the spawn top");
+    for (const Position &cell : rotatedCells)
+    {
+        Expect(cell.row >= 0, "rotation kick keeps rotated cells inside the top of the board");
+        Expect(cell.column >= 0 && cell.column < 10, "rotation kick keeps rotated cells inside board columns");
+    }
+}
+
 void TestSoftDropScoresOnePoint()
 {
     Game game;
@@ -193,6 +209,7 @@ int main()
     TestGridClearsSingleRow();
     TestGridClearsMultipleRows();
     TestBlockRotationCycles();
+    TestRotationKickAllowsIBlockToRotateAtTop();
     TestSoftDropScoresOnePoint();
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();

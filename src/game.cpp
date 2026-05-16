@@ -7,6 +7,18 @@ const int LinesPerLevel = 10;
 const int BaseDropIntervalMs = 350;
 const int DropIntervalStepMs = 25;
 const int MinimumDropIntervalMs = 100;
+
+const Position WallKickOffsets[] = {
+    Position(0, 0),
+    Position(0, -1),
+    Position(0, 1),
+    Position(0, -2),
+    Position(0, 2),
+    Position(1, 0),
+    Position(1, -1),
+    Position(1, 1),
+    Position(-1, 0),
+};
 }
 
 Game::Game()
@@ -16,6 +28,21 @@ Game::Game()
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
+    gameOver = false;
+    paused = false;
+    hasHeldBlock = false;
+    holdUsed = false;
+    score = 0;
+    linesCleared = 0;
+}
+
+Game::Game(const Block &startingBlock, const Block &upcomingBlock)
+{
+    grid = Grid();
+    randomGenerator = std::mt19937(0);
+    blocks = GetAllBlocks();
+    currentBlock = startingBlock;
+    nextBlock = upcomingBlock;
     gameOver = false;
     paused = false;
     hasHeldBlock = false;
@@ -321,7 +348,7 @@ void Game::RotateBlock()
     if (!gameOver && !paused)
     {
         currentBlock.Rotate();
-        if (IsBlockOutside() || BlockFits() == false)
+        if (!TryWallKick())
         {
             currentBlock.UndoRotation();
         }
@@ -330,6 +357,20 @@ void Game::RotateBlock()
             PlayRotateSound();
         }
     }
+}
+
+bool Game::TryWallKick()
+{
+    for (Position offset : WallKickOffsets)
+    {
+        currentBlock.Move(offset.row, offset.column);
+        if (!IsBlockOutside() && BlockFits())
+        {
+            return true;
+        }
+        currentBlock.Move(-offset.row, -offset.column);
+    }
+    return false;
 }
 
 void Game::LockBlock()

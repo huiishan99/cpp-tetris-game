@@ -26,6 +26,23 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add rotation kick assist
+
+- Changed: Added simple wall/spawn kick offsets for rotation, a deterministic
+  game constructor for core tests, and a test that verifies an I block can
+  rotate near the spawn top without leaving the board.
+- Why: Make rotation feel more forgiving near walls and the top of the playfield
+  instead of immediately rejecting close rotations.
+- Risk: This is a simple kick table, not full SRS; some advanced rotation cases
+  may still differ from modern guideline Tetris. Win32 GUI build was not
+  available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Replace the simple kick table with piece-specific SRS data if the
+  project aims for guideline-accurate Tetris behavior.
+
 ### 2026-05-16 - Add hold block
 
 - Changed: Added hold-block state, `C`/`Shift` input handling, Hold/Next preview
