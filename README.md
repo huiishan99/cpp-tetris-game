@@ -10,6 +10,7 @@ no graphics-library setup.
 - Classic Tetris movement
 - Score tracking
 - Line count and level progression
+- Hold-block swap
 - Next-block preview
 - Ghost landing preview
 - Pause and resume
@@ -27,6 +28,7 @@ no graphics-library setup.
 | Down Arrow or S | Soft drop |
 | Up Arrow or W | Rotate block |
 | Space | Drop block instantly |
+| C or Shift | Hold or swap block |
 | P | Pause or resume |
 | Any key after game over | Restart |
 | Q | Quit |

@@ -155,6 +155,28 @@ void TestNextBlockPreviewHasFourCells()
     Expect(game.GetNextBlockCells().size() == 4, "next block preview exposes four cells");
 }
 
+void TestHoldStoresCurrentBlockOncePerDrop()
+{
+    Game game;
+    int startingBlockId = game.GetCurrentBlockId();
+    int startingNextBlockId = game.GetNextBlockId();
+
+    Expect(game.CanHold(), "hold is available before use");
+    game.HandleInput('c');
+
+    Expect(game.HasHeldBlock(), "hold stores a block");
+    Expect(game.GetHeldBlockId() == startingBlockId, "hold stores the original current block");
+    Expect(game.GetCurrentBlockId() == startingNextBlockId, "first hold advances the next block");
+    Expect(!game.CanHold(), "hold is locked until the block lands");
+
+    int currentAfterHold = game.GetCurrentBlockId();
+    game.HandleInput('c');
+    Expect(game.GetCurrentBlockId() == currentAfterHold, "second hold before landing is ignored");
+
+    game.HandleInput(' ');
+    Expect(game.CanHold(), "hold unlocks after the active block lands");
+}
+
 void TestLevelAndDropSpeedProgression()
 {
     Expect(Game::CalculateLevel(0) == 1, "level starts at one");
@@ -175,6 +197,7 @@ int main()
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();
+    TestHoldStoresCurrentBlockOncePerDrop();
     TestLevelAndDropSpeedProgression();
 
     std::cout << "All core tests passed." << std::endl;

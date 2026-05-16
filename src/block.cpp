@@ -2,6 +2,7 @@
 
 Block::Block()
 {
+    id = 0;
     rotationState = 0;
     rowOffset = 0;
     columnOffset = 0;

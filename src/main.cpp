@@ -167,13 +167,21 @@ void DrawMetricPanel(HDC hdc, int x, int y, int width, int height,
     DrawTextLine(hdc, x + 14, y + 32, value, 28, RGB(248, 244, 225), FW_BOLD);
 }
 
-void DrawNextPreview(HDC hdc, int x, int y, int width, int height)
+void DrawBlockPreview(HDC hdc, int x, int y, int width, int height,
+                      const std::string &label, const std::vector<Position> &cells,
+                      int blockId, bool dimmed)
 {
     FillRoundRectColor(hdc, x, y, x + width, y + height, 8,
                        RGB(31, 35, 36), RGB(61, 70, 62));
-    DrawTextLine(hdc, x + 14, y + 10, "Next", 16, RGB(170, 178, 158), FW_NORMAL);
+    COLORREF labelColor = dimmed ? RGB(115, 122, 108) : RGB(170, 178, 158);
+    DrawTextLine(hdc, x + 14, y + 10, label, 16, labelColor, FW_NORMAL);
 
-    std::vector<Position> cells = game.GetNextBlockCells();
+    if (cells.empty())
+    {
+        DrawTextLine(hdc, x + 22, y + height / 2 - 8, "EMPTY", 16, RGB(100, 108, 96), FW_BOLD);
+        return;
+    }
+
     int minRow = cells[0].row;
     int maxRow = cells[0].row;
     int minColumn = cells[0].column;
@@ -208,7 +216,7 @@ void DrawNextPreview(HDC hdc, int x, int y, int width, int height)
     {
         int cellX = originX + (cell.column - minColumn) * previewCellSize;
         int cellY = originY + (cell.row - minRow) * previewCellSize;
-        DrawCellAt(hdc, cellX, cellY, previewCellSize, game.GetNextBlockId());
+        DrawCellAt(hdc, cellX, cellY, previewCellSize, blockId);
     }
 }
 
@@ -290,8 +298,11 @@ void DrawGame(HDC hdc)
                     "Lines", std::to_string(game.GetLinesCleared()));
     DrawMetricPanel(hdc, panelX + (panelWidth + 12) / 2, BOARD_TOP + 112,
                     (panelWidth - 12) / 2, 78, "Level", std::to_string(game.GetLevel()));
-    DrawNextPreview(hdc, panelX, BOARD_TOP + 208, panelWidth, 156);
-    DrawStatusPanel(hdc, panelX, BOARD_TOP + 388, panelWidth);
+    DrawBlockPreview(hdc, panelX, BOARD_TOP + 208, panelWidth, 126,
+                     "Hold", game.GetHeldBlockCells(), game.GetHeldBlockId(), !game.CanHold());
+    DrawBlockPreview(hdc, panelX, BOARD_TOP + 350, panelWidth, 126,
+                     "Next", game.GetNextBlockCells(), game.GetNextBlockId(), false);
+    DrawStatusPanel(hdc, panelX, BOARD_TOP + 486, panelWidth);
 }
 
 void HandleGameKey(HWND hwnd, WPARAM key)
@@ -320,6 +331,10 @@ void HandleGameKey(HWND hwnd, WPARAM key)
     case VK_SPACE:
         input = ' ';
         break;
+    case VK_SHIFT:
+        input = 'c';
+        break;
+    case 'C':
     case 'A':
     case 'D':
     case 'S':

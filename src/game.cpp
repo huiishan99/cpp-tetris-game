@@ -18,6 +18,8 @@ Game::Game()
     nextBlock = GetRandomBlock();
     gameOver = false;
     paused = false;
+    hasHeldBlock = false;
+    holdUsed = false;
     score = 0;
     linesCleared = 0;
 }
@@ -69,6 +71,15 @@ std::vector<Position> Game::GetNextBlockCells() const
     return nextBlock.GetCellPositions();
 }
 
+std::vector<Position> Game::GetHeldBlockCells() const
+{
+    if (!hasHeldBlock)
+    {
+        return {};
+    }
+    return heldBlock.GetCellPositions();
+}
+
 int Game::GetCurrentBlockId() const
 {
     return currentBlock.id;
@@ -77,6 +88,15 @@ int Game::GetCurrentBlockId() const
 int Game::GetNextBlockId() const
 {
     return nextBlock.id;
+}
+
+int Game::GetHeldBlockId() const
+{
+    if (!hasHeldBlock)
+    {
+        return 0;
+    }
+    return heldBlock.id;
 }
 
 int Game::GetScore() const
@@ -107,6 +127,16 @@ bool Game::IsGameOver() const
 bool Game::IsPaused() const
 {
     return paused;
+}
+
+bool Game::HasHeldBlock() const
+{
+    return hasHeldBlock;
+}
+
+bool Game::CanHold() const
+{
+    return !gameOver && !paused && !holdUsed;
 }
 
 int Game::CalculateLevel(int completedLines)
@@ -154,6 +184,10 @@ void Game::HandleInput(int key)
 
     switch (key)
     {
+    case 'c':
+    case 'C':
+        HoldBlock();
+        break;
     case 'a':
     case 'A':
         MoveBlockLeft();
@@ -234,6 +268,36 @@ void Game::DropBlock()
     }
 }
 
+void Game::HoldBlock()
+{
+    if (!CanHold())
+    {
+        return;
+    }
+
+    Block previousCurrent = CreateBlockById(currentBlock.id);
+    if (!hasHeldBlock)
+    {
+        heldBlock = previousCurrent;
+        hasHeldBlock = true;
+        currentBlock = nextBlock;
+        nextBlock = GetRandomBlock();
+    }
+    else
+    {
+        Block previousHeld = heldBlock;
+        heldBlock = previousCurrent;
+        currentBlock = previousHeld;
+    }
+
+    holdUsed = true;
+    if (BlockFits() == false)
+    {
+        gameOver = true;
+        paused = false;
+    }
+}
+
 bool Game::IsBlockOutside() const
 {
     return IsBlockOutside(currentBlock);
@@ -276,6 +340,7 @@ void Game::LockBlock()
         grid.grid[item.row][item.column] = currentBlock.id;
     }
     currentBlock = nextBlock;
+    holdUsed = false;
     if (BlockFits() == false)
     {
         gameOver = true;
@@ -308,6 +373,29 @@ bool Game::BlockFits(const Block &block) const
     return true;
 }
 
+Block Game::CreateBlockById(int blockId) const
+{
+    switch (blockId)
+    {
+    case 1:
+        return LBlock();
+    case 2:
+        return JBlock();
+    case 3:
+        return IBlock();
+    case 4:
+        return OBlock();
+    case 5:
+        return SBlock();
+    case 6:
+        return TBlock();
+    case 7:
+        return ZBlock();
+    default:
+        return Block();
+    }
+}
+
 void Game::Reset()
 {
     grid.Initialize();
@@ -316,6 +404,8 @@ void Game::Reset()
     nextBlock = GetRandomBlock();
     gameOver = false;
     paused = false;
+    hasHeldBlock = false;
+    holdUsed = false;
     score = 0;
     linesCleared = 0;
 }

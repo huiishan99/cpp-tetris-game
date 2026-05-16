@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add hold block
+
+- Changed: Added hold-block state, `C`/`Shift` input handling, Hold/Next preview
+  panels, a safe default block id, and a core test that verifies hold can only
+  be used once before a block lands.
+- Why: Bring the controls closer to modern Tetris and give players more
+  strategic choice during placement.
+- Risk: Current/next/held block swapping touches spawn flow; Win32 GUI build was
+  not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune Hold panel spacing on Windows and consider a subtle visual
+  lock indicator after Hold is used.
+
 ### 2026-05-16 - Polish Win32 game UI
 
 - Changed: Reworked the Win32 drawing style with a wider window, warmer dark

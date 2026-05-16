@@ -14,14 +14,18 @@ public:
     std::vector<Position> GetCurrentBlockCells() const;
     std::vector<Position> GetGhostBlockCells() const;
     std::vector<Position> GetNextBlockCells() const;
+    std::vector<Position> GetHeldBlockCells() const;
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
+    int GetHeldBlockId() const;
     int GetScore() const;
     int GetLinesCleared() const;
     int GetLevel() const;
     int GetDropIntervalMs() const;
     bool IsGameOver() const;
     bool IsPaused() const;
+    bool HasHeldBlock() const;
+    bool CanHold() const;
     static int CalculateLevel(int completedLines);
     static int CalculateDropIntervalMs(int level);
 
@@ -29,8 +33,10 @@ private:
     void MoveBlockLeft();
     void MoveBlockRight();
     void DropBlock();
+    void HoldBlock();
     Block GetRandomBlock();
     std::vector<Block> GetAllBlocks();
+    Block CreateBlockById(int blockId) const;
     bool IsBlockOutside() const;
     bool IsBlockOutside(const Block &block) const;
     void RotateBlock();
@@ -44,9 +50,12 @@ private:
     std::vector<Block> blocks;
     Block currentBlock;
     Block nextBlock;
+    Block heldBlock;
     std::mt19937 randomGenerator;
     bool gameOver;
     bool paused;
+    bool hasHeldBlock;
+    bool holdUsed;
     int score;
     int linesCleared;
 };
