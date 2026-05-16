@@ -83,6 +83,7 @@ Game::Game()
     holdUsed = false;
     lastSuccessfulActionWasRotate = false;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -110,6 +111,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     holdUsed = false;
     lastSuccessfulActionWasRotate = false;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -137,6 +139,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     holdUsed = false;
     lastSuccessfulActionWasRotate = false;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -169,6 +172,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     holdUsed = false;
     lastSuccessfulActionWasRotate = false;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     score = 0;
     highScore = 0;
     linesCleared = initialLinesCleared;
@@ -320,9 +324,19 @@ int Game::GetLastClearScore() const
     return lastClearScore;
 }
 
+bool Game::WasLastClearSpin() const
+{
+    return lastClearSpinBlockId != 0;
+}
+
 bool Game::WasLastClearTSpin() const
 {
     return lastClearWasTSpin;
+}
+
+int Game::GetLastClearSpinBlockId() const
+{
+    return lastClearSpinBlockId;
 }
 
 const std::vector<int> &Game::GetLastClearedRows() const
@@ -419,6 +433,23 @@ int Game::CalculateTSpinScore(int completedLines)
         return 1200;
     case 3:
         return 1600;
+    default:
+        return 0;
+    }
+}
+
+int Game::CalculateStyleSpinScore(int completedLines)
+{
+    switch (completedLines)
+    {
+    case 1:
+        return 400;
+    case 2:
+        return 700;
+    case 3:
+        return 1000;
+    case 4:
+        return 1200;
     default:
         return 0;
     }
@@ -721,9 +752,30 @@ bool Game::IsCurrentTSpin() const
     return blockedCorners >= 3;
 }
 
+bool Game::IsCurrentStyleSpin() const
+{
+    if (!lastSuccessfulActionWasRotate || currentBlock.id == 0 || currentBlock.id == 4 || currentBlock.id == 6)
+    {
+        return false;
+    }
+
+    return !CanMoveBlock(currentBlock, 0, -1) &&
+           !CanMoveBlock(currentBlock, 0, 1) &&
+           !CanMoveBlock(currentBlock, 1, 0);
+}
+
+bool Game::CanMoveBlock(const Block &block, int rowOffset, int columnOffset) const
+{
+    Block movedBlock = block;
+    movedBlock.Move(rowOffset, columnOffset);
+    return !IsBlockOutside(movedBlock) && BlockFits(movedBlock);
+}
+
 void Game::LockBlock()
 {
     bool tSpin = IsCurrentTSpin();
+    bool styleSpin = !tSpin && IsCurrentStyleSpin();
+    int spinBlockId = tSpin || styleSpin ? currentBlock.id : 0;
     std::vector<Position> tiles = currentBlock.GetCellPositions();
     for (Position item : tiles)
     {
@@ -736,6 +788,7 @@ void Game::LockBlock()
     if (!fullRows.empty())
     {
         lastClearWasTSpin = tSpin;
+        lastClearSpinBlockId = spinBlockId;
         StartLineClear(fullRows);
         return;
     }
@@ -744,6 +797,7 @@ void Game::LockBlock()
     lastClearLines = 0;
     lastClearScore = 0;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     lastClearedRows.clear();
     SpawnNextBlock();
 }
@@ -754,11 +808,22 @@ void Game::StartLineClear(const std::vector<int> &fullRows)
     lineClearPending = true;
     combo++;
     lastClearLines = rowsCleared;
-    lastClearScore = lastClearWasTSpin ? CalculateTSpinScore(rowsCleared) : CalculateLineClearScore(rowsCleared);
+    if (lastClearWasTSpin)
+    {
+        lastClearScore = CalculateTSpinScore(rowsCleared);
+    }
+    else if (lastClearSpinBlockId != 0)
+    {
+        lastClearScore = CalculateStyleSpinScore(rowsCleared);
+    }
+    else
+    {
+        lastClearScore = CalculateLineClearScore(rowsCleared);
+    }
     lastClearedRows = fullRows;
     clearEventId++;
     PlayLineClearSound();
-    UpdateScore(rowsCleared, 0, lastClearWasTSpin);
+    UpdateScore(rowsCleared, 0, lastClearSpinBlockId);
 }
 
 void Game::FinishLineClear()
@@ -872,6 +937,7 @@ void Game::Reset()
     holdUsed = false;
     lastSuccessfulActionWasRotate = false;
     lastClearWasTSpin = false;
+    lastClearSpinBlockId = 0;
     score = 0;
     linesCleared = 0;
     lastClearLines = 0;
@@ -883,10 +949,21 @@ void Game::Reset()
     lastLevelReached = 1;
 }
 
-void Game::UpdateScore(int linesCompleted, int moveDownPoints, bool tSpin)
+void Game::UpdateScore(int linesCompleted, int moveDownPoints, int spinBlockId)
 {
     int previousLevel = GetLevel();
-    score += tSpin ? CalculateTSpinScore(linesCompleted) : CalculateLineClearScore(linesCompleted);
+    if (spinBlockId == 6)
+    {
+        score += CalculateTSpinScore(linesCompleted);
+    }
+    else if (spinBlockId != 0)
+    {
+        score += CalculateStyleSpinScore(linesCompleted);
+    }
+    else
+    {
+        score += CalculateLineClearScore(linesCompleted);
+    }
     linesCleared += linesCompleted;
     score += moveDownPoints;
     int currentLevel = GetLevel();

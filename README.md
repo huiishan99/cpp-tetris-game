@@ -16,6 +16,7 @@ no graphics-library setup.
 - Line-clear feedback and combo counter
 - Faster delayed line-clear flash animation
 - T-spin clear detection and bonus scoring
+- Style-spin detection for L/J/I/S/Z clears
 - Hold-block swap
 - Three-block next queue preview
 - Ghost landing preview
@@ -50,6 +51,7 @@ no graphics-library setup.
 - Hard drop: 2 points per row
 - Line clear scoring: 100 / 300 / 500 / 800 points
 - T-spin clear scoring: 800 / 1200 / 1600 points
+- Style-spin clear scoring: 400 / 700 / 1000 / 1200 points
 - Consecutive line-clearing locks increase the combo counter
 - Level increases every 10 cleared lines
 - Automatic drop speed increases with level, capped at a minimum interval

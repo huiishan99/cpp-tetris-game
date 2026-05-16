@@ -26,6 +26,24 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add style-spin clears
+
+- Changed: Added immobile style-spin detection for L/J/I/S/Z pieces after a
+  successful rotation, stored the last spin block id, rendered spin labels such
+  as `L-SPIN`, added style-spin bonus scoring, and expanded core tests for an
+  L-spin single.
+- Why: Let the game recognize satisfying non-T spin clears without pretending
+  they are standard T-spin scoring.
+- Risk: Style spins use a simple immobility rule and the existing simple kick
+  table, so they are a custom all-spin style rather than a full guideline
+  implementation.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add piece-specific SRS kicks and a rules toggle if the game should
+  support both strict T-spin-only and all-spin modes.
+
 ### 2026-05-16 - Improve pause resume and restart controls
 
 - Changed: Pause now resumes on any key, paused Space is consumed instead of

@@ -374,6 +374,27 @@ std::string GetClearLabel(int clearedLines)
     }
 }
 
+std::string GetSpinLabel(int blockId)
+{
+    switch (blockId)
+    {
+    case 1:
+        return "L-SPIN";
+    case 2:
+        return "J-SPIN";
+    case 3:
+        return "I-SPIN";
+    case 5:
+        return "S-SPIN";
+    case 6:
+        return "T-SPIN";
+    case 7:
+        return "Z-SPIN";
+    default:
+        return "";
+    }
+}
+
 void DrawStatusPanel(HDC hdc, int x, int y, int width)
 {
     std::string status = "READY";
@@ -413,11 +434,13 @@ void DrawStatusPanel(HDC hdc, int x, int y, int width)
     }
     else if (game.GetLastClearLines() > 0 && game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
     {
-        std::string clearText = game.WasLastClearTSpin() ? "T-SPIN" : GetClearLabel(game.GetLastClearLines());
+        std::string clearText = game.WasLastClearSpin()
+                                    ? GetSpinLabel(game.GetLastClearSpinBlockId())
+                                    : GetClearLabel(game.GetLastClearLines());
         std::string scoreText = "+" + std::to_string(game.GetLastClearScore());
         DrawTextLine(hdc, x + 14, y + 30, clearText, 22, RGB(249, 214, 124), FW_BOLD);
         DrawTextLine(hdc, x + 104, y + 33, scoreText, 18, RGB(248, 244, 225), FW_BOLD);
-        std::string detailText = game.WasLastClearTSpin()
+        std::string detailText = game.WasLastClearSpin()
                                      ? GetClearLabel(game.GetLastClearLines()) + "   Combo x" + std::to_string(game.GetCombo())
                                      : "Combo x" + std::to_string(game.GetCombo());
         DrawTextLine(hdc, x + 14, y + 56, detailText, 16, RGB(170, 178, 158), FW_NORMAL);

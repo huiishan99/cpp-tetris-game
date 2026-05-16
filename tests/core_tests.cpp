@@ -334,6 +334,7 @@ void TestLineClearFeedbackAndComboReset()
     Expect(pendingRowStillFilled, "line clear keeps the completed row visible during animation");
     Expect(game.GetLastClearLines() == 1, "line clear feedback stores cleared line count");
     Expect(game.GetLastClearScore() == 100, "line clear feedback stores clear score");
+    Expect(!game.WasLastClearSpin(), "normal line clear is not marked as a spin");
     Expect(!game.WasLastClearTSpin(), "normal line clear is not marked as T-spin");
     Expect(game.GetLastClearedRows().size() == 1 && game.GetLastClearedRows()[0] == 19, "line clear feedback stores cleared row index");
     Expect(game.GetClearEventId() == startingClearEvent + 1, "line clear increments clear event id");
@@ -387,10 +388,42 @@ void TestTSpinSingleFeedbackAndScore()
     game.HandleInput(' ');
 
     Expect(game.IsLineClearPending(), "T-spin single waits for clear animation");
+    Expect(game.WasLastClearSpin(), "T-spin single is marked as a spin");
     Expect(game.WasLastClearTSpin(), "T-spin single is marked as T-spin");
+    Expect(game.GetLastClearSpinBlockId() == 6, "T-spin single stores the T block id");
     Expect(game.GetLastClearLines() == 1, "T-spin single clears one line");
     Expect(game.GetLastClearScore() == 800, "T-spin single uses T-spin score");
     Expect(game.GetScore() >= 800, "T-spin single adds the bonus score");
+}
+
+void TestStyleSpinSingleFeedbackAndScore()
+{
+    Grid grid;
+    for (int column = 0; column < 10; column++)
+    {
+        if (column < 3 || column > 5)
+        {
+            grid.grid[19][column] = 7;
+        }
+    }
+
+    LBlock block;
+    block.Rotate();
+    block.Rotate();
+    block.Rotate();
+    block.Move(18, 0);
+
+    Game game{block, OBlock(), grid};
+    game.Start();
+    game.HandleInput('w');
+    game.HandleInput(' ');
+
+    Expect(game.IsLineClearPending(), "L-spin single waits for clear animation");
+    Expect(game.WasLastClearSpin(), "L-spin single is marked as a spin");
+    Expect(!game.WasLastClearTSpin(), "L-spin single is not marked as T-spin");
+    Expect(game.GetLastClearSpinBlockId() == 1, "L-spin single stores the L block id");
+    Expect(game.GetLastClearLines() == 1, "L-spin single clears one line");
+    Expect(game.GetLastClearScore() == 400, "L-spin single uses style-spin score");
 }
 
 void TestLevelUpEventOnLineThreshold()
@@ -421,6 +454,8 @@ void TestLevelAndDropSpeedProgression()
     Expect(Game::CalculateLineClearScore(4) == 800, "four-line clear uses Tetris score");
     Expect(Game::CalculateTSpinScore(1) == 800, "T-spin single uses its bonus score");
     Expect(Game::CalculateTSpinScore(3) == 1600, "T-spin triple uses its bonus score");
+    Expect(Game::CalculateStyleSpinScore(1) == 400, "style-spin single uses its bonus score");
+    Expect(Game::CalculateStyleSpinScore(4) == 1200, "style-spin four-line clear uses its bonus score");
     Expect(Game::CalculateLevel(0) == 1, "level starts at one");
     Expect(Game::CalculateLevel(9) == 1, "level stays one before ten lines");
     Expect(Game::CalculateLevel(10) == 2, "level increases every ten lines");
@@ -449,6 +484,7 @@ int main()
     TestHoldStoresCurrentBlockOncePerDrop();
     TestLineClearFeedbackAndComboReset();
     TestTSpinSingleFeedbackAndScore();
+    TestStyleSpinSingleFeedbackAndScore();
     TestLevelUpEventOnLineThreshold();
     TestLevelAndDropSpeedProgression();
 
