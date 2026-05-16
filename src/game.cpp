@@ -349,6 +349,7 @@ void Game::HandleInput(int key)
     case 'S':
         if (MoveBlockDown())
         {
+            PlaySoftDropSound();
             UpdateScore(0, 1);
         }
         break;
@@ -386,6 +387,10 @@ void Game::MoveBlockLeft()
         {
             currentBlock.Move(0, 1);
         }
+        else
+        {
+            PlayMoveSound();
+        }
     }
 }
 
@@ -397,6 +402,10 @@ void Game::MoveBlockRight()
         if (IsBlockOutside() || BlockFits() == false)
         {
             currentBlock.Move(0, -1);
+        }
+        else
+        {
+            PlayMoveSound();
         }
     }
 }
@@ -428,6 +437,10 @@ void Game::DropBlock()
             if (IsBlockOutside() || BlockFits() == false)
             {
                 currentBlock.Move(-1, 0);
+                if (rowsDropped > 0)
+                {
+                    PlayHardDropSound();
+                }
                 LockBlock();
                 break;
             }
@@ -464,7 +477,10 @@ void Game::HoldBlock()
     {
         gameOver = true;
         paused = false;
+        PlayGameOverSound();
+        return;
     }
+    PlayHoldSound();
 }
 
 bool Game::IsBlockOutside() const
@@ -571,6 +587,7 @@ void Game::SpawnNextBlock()
         gameOver = true;
         started = true;
         paused = false;
+        PlayGameOverSound();
     }
     nextBlock = GetRandomBlock();
 }
@@ -658,5 +675,6 @@ void Game::TogglePause()
     if (!gameOver)
     {
         paused = !paused;
+        PlayPauseSound();
     }
 }

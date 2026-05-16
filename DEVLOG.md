@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add richer action sounds
+
+- Changed: Added separate lightweight Win32 beep cues for movement, soft drop,
+  hard drop, hold, pause, and game over, while keeping rotate and line-clear
+  cues. Updated the feature list to describe the broader sound feedback.
+- Why: Make controls feel more responsive and give players clearer feedback for
+  successful actions and terminal states.
+- Risk: Win32 `Beep` is intentionally simple and blocking for very short
+  durations; exact feel should be checked on Windows speakers.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Replace beep cues with non-blocking audio files if the project
+  later gains an asset pipeline.
+
 ### 2026-05-16 - Delay row collapse during line clear
 
 - Changed: Added a `lineClearPending` state, delayed row collapse through

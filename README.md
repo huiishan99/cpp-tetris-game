@@ -22,7 +22,8 @@ no graphics-library setup.
 - Soft drop and instant drop
 - Polished dark UI with block preview and status panels
 - Native Windows window rendering
-- Small Windows beep sounds for rotate and row clear
+- Small Windows beep sounds for movement, drops, hold, rotate, row clear,
+  pause, and game over
 
 ## Controls
 
