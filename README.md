@@ -30,6 +30,7 @@ no graphics-library setup.
 
 - Windows
 - A C++ compiler such as MinGW-w64 `g++`
+- CMake is optional, but recommended for Visual Studio, Ninja, and other IDEs
 - VS Code is optional
 
 You do not need Raylib, `C:\raylib`, fonts, image assets, or audio files for
@@ -72,6 +73,22 @@ Or use the included batch file:
 `build.bat` uses `g++` when it is available. If you run it from a Visual Studio
 Developer Command Prompt, it can also build with `cl`.
 
+Or use CMake with MinGW:
+
+```powershell
+cmake -S . -B build -G "MinGW Makefiles"
+cmake --build build
+.\build\main.exe
+```
+
+Or use CMake with Visual Studio:
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022"
+cmake --build build --config Release
+.\build\Release\main.exe
+```
+
 Run:
 
 ```powershell
@@ -100,6 +117,12 @@ src/
 
 Every repository change should include a new entry in `DEVLOG.md`. Record what
 changed, why it changed, the risk, verification steps, and any follow-up work.
+
+## Portability Note
+
+The current game window is built directly on the Win32 API, so the full game
+currently targets Windows. Future work can split the game rules from the
+renderer so the core can be tested on macOS/Linux and reused by other frontends.
 
 ## Troubleshooting
 

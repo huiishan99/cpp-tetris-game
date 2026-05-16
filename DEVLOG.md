@@ -26,6 +26,17 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add CMake Windows build
+
+- Changed: Added `CMakeLists.txt` and documented MinGW/Visual Studio CMake
+  build commands in `README.md`.
+- Why: Support more Windows compiler and IDE setups with one build definition.
+- Risk: CMake configuration is new and currently limited to Win32 builds.
+- Verified: Tried `cmake -S . -B /private/tmp/cpp-tetris-cmake-check`;
+  `cmake` is not installed in this environment. Win32 GUI build not run.
+- Follow-ups: Split game logic from Win32 rendering so the core can build and
+  be tested on non-Windows platforms.
+
 ### 2026-05-16 - Add maintenance devlog
 
 - Changed: Created `DEVLOG.md` and linked it from `README.md`.
