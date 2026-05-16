@@ -38,6 +38,7 @@ Game::Game()
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
+    clearEventId = 0;
     combo = 0;
 }
 
@@ -58,6 +59,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
+    clearEventId = 0;
     combo = 0;
 }
 
@@ -78,6 +80,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
+    clearEventId = 0;
     combo = 0;
 }
 
@@ -188,6 +191,16 @@ int Game::GetLastClearLines() const
 int Game::GetLastClearScore() const
 {
     return lastClearScore;
+}
+
+const std::vector<int> &Game::GetLastClearedRows() const
+{
+    return lastClearedRows;
+}
+
+int Game::GetClearEventId() const
+{
+    return clearEventId;
 }
 
 int Game::GetCombo() const
@@ -496,12 +509,15 @@ void Game::LockBlock()
         paused = false;
     }
     nextBlock = GetRandomBlock();
+    std::vector<int> fullRows = grid.GetFullRows();
     int rowsCleared = grid.ClearFullRows();
     if (rowsCleared > 0)
     {
         combo++;
         lastClearLines = rowsCleared;
         lastClearScore = CalculateLineClearScore(rowsCleared);
+        lastClearedRows = fullRows;
+        clearEventId++;
         PlayLineClearSound();
         UpdateScore(rowsCleared, 0);
     }
@@ -510,6 +526,7 @@ void Game::LockBlock()
         combo = 0;
         lastClearLines = 0;
         lastClearScore = 0;
+        lastClearedRows.clear();
     }
 }
 
@@ -569,6 +586,8 @@ void Game::Reset()
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
+    lastClearedRows.clear();
+    clearEventId = 0;
     combo = 0;
 }
 

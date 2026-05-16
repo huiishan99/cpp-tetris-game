@@ -28,6 +28,8 @@ public:
     int GetLinesCleared() const;
     int GetLastClearLines() const;
     int GetLastClearScore() const;
+    const std::vector<int> &GetLastClearedRows() const;
+    int GetClearEventId() const;
     int GetCombo() const;
     int GetLevel() const;
     int GetDropIntervalMs() const;
@@ -75,5 +77,7 @@ private:
     int linesCleared;
     int lastClearLines;
     int lastClearScore;
+    std::vector<int> lastClearedRows;
+    int clearEventId;
     int combo;
 };

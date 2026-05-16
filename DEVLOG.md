@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add line clear flash
+
+- Changed: Added `Grid::GetFullRows`, tracked the last cleared row indices and
+  clear event id in `Game`, added a short Win32 clear-flash timer/render pass,
+  and expanded core tests for cleared-row/event tracking.
+- Why: Make cleared lines visibly pop on the board instead of only updating the
+  side-panel text.
+- Risk: The flash is a lightweight post-clear overlay, not a delayed clear
+  animation; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: If desired, convert this to a true delayed clear animation that
+  holds the completed rows for a few frames before collapsing the board.
+
 ### 2026-05-16 - Add game state overlays
 
 - Changed: Added a start-gated game state, `Game::Start`, `Game::IsStarted`,

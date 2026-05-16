@@ -71,8 +71,10 @@ void TestGridClearsSingleRow()
     }
     grid.grid[18][4] = 7;
 
+    std::vector<int> fullRows = grid.GetFullRows();
     int rowsCleared = grid.ClearFullRows();
 
+    Expect(fullRows.size() == 1 && fullRows[0] == 19, "reports one full row before clearing");
     Expect(rowsCleared == 1, "clears one completed row");
     Expect(grid.grid[19][4] == 7, "moves rows above a cleared row down");
     Expect(grid.grid[18][4] == 0, "clears the original moved row");
@@ -275,10 +277,13 @@ void TestLineClearFeedbackAndComboReset()
 
     Game game{IBlock(), OBlock(), grid};
     game.Start();
+    int startingClearEvent = game.GetClearEventId();
     game.HandleInput(' ');
 
     Expect(game.GetLastClearLines() == 1, "line clear feedback stores cleared line count");
     Expect(game.GetLastClearScore() == 100, "line clear feedback stores clear score");
+    Expect(game.GetLastClearedRows().size() == 1 && game.GetLastClearedRows()[0] == 19, "line clear feedback stores cleared row index");
+    Expect(game.GetClearEventId() == startingClearEvent + 1, "line clear increments clear event id");
     Expect(game.GetCombo() == 1, "first clear starts combo at one");
     Expect(game.GetLinesCleared() == 1, "game tracks total cleared lines after lock");
 

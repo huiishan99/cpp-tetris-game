@@ -13,6 +13,7 @@ no graphics-library setup.
 - Start, pause, and game-over overlay panels
 - Line count and level progression
 - Line-clear feedback and combo counter
+- Line-clear flash animation
 - Hold-block swap
 - Next-block preview
 - Ghost landing preview

@@ -49,6 +49,19 @@ bool Grid::IsCellEmpty(int row, int column) const
     return false;
 }
 
+std::vector<int> Grid::GetFullRows() const
+{
+    std::vector<int> rows;
+    for (int row = numRows - 1; row >= 0; row--)
+    {
+        if (IsRowFull(row))
+        {
+            rows.push_back(row);
+        }
+    }
+    return rows;
+}
+
 int Grid::ClearFullRows()
 {
     int completed = 0;

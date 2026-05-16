@@ -10,9 +10,13 @@ const int BOARD_LEFT = 32;
 const int BOARD_TOP = 64;
 const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
+const int FLASH_TIMER_ID = 2;
+const int CLEAR_FLASH_DURATION_MS = 320;
 const char *HIGH_SCORE_FILE = "tetris_highscore.txt";
 
 Game game;
+int observedClearEventId = 0;
+DWORD clearFlashStartedAt = 0;
 
 COLORREF GetBlockColor(int blockId)
 {
@@ -341,6 +345,53 @@ void DrawStateOverlay(HDC hdc)
     }
 }
 
+bool IsClearFlashActive()
+{
+    if (observedClearEventId == 0 || game.GetLastClearedRows().empty())
+    {
+        return false;
+    }
+
+    DWORD elapsed = GetTickCount() - clearFlashStartedAt;
+    return elapsed < static_cast<DWORD>(CLEAR_FLASH_DURATION_MS);
+}
+
+void UpdateClearFlash(HWND hwnd)
+{
+    int clearEventId = game.GetClearEventId();
+    if (clearEventId != observedClearEventId)
+    {
+        observedClearEventId = clearEventId;
+        if (clearEventId > 0)
+        {
+            clearFlashStartedAt = GetTickCount();
+            SetTimer(hwnd, FLASH_TIMER_ID, 45, nullptr);
+        }
+    }
+}
+
+void DrawLineClearFlash(HDC hdc)
+{
+    if (!IsClearFlashActive())
+    {
+        return;
+    }
+
+    DWORD elapsed = GetTickCount() - clearFlashStartedAt;
+    COLORREF flashColor = ((elapsed / 80) % 2 == 0) ? RGB(249, 214, 124) : RGB(248, 244, 225);
+
+    for (int row : game.GetLastClearedRows())
+    {
+        int top = BOARD_TOP + row * CELL_SIZE;
+        FillRoundRectColor(hdc, BOARD_LEFT + 4, top + 5,
+                           BOARD_LEFT + CELL_SIZE * 10 - 4, top + CELL_SIZE - 5,
+                           6, flashColor, AdjustColor(flashColor, -55));
+        FillRectColor(hdc, BOARD_LEFT + 12, top + 12,
+                      BOARD_LEFT + CELL_SIZE * 10 - 12, top + 16,
+                      RGB(255, 255, 245));
+    }
+}
+
 void DrawGame(HDC hdc)
 {
     FillVerticalGradient(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -385,6 +436,8 @@ void DrawGame(HDC hdc)
             DrawCell(hdc, item.row, item.column, game.GetCurrentBlockId());
         }
     }
+
+    DrawLineClearFlash(hdc);
 
     int panelX = BOARD_LEFT + CELL_SIZE * 10 + 34;
     int panelWidth = WINDOW_WIDTH - panelX - 32;
@@ -453,6 +506,7 @@ void HandleGameKey(HWND hwnd, WPARAM key)
     if (input != 0)
     {
         game.HandleInput(input);
+        UpdateClearFlash(hwnd);
         InvalidateRect(hwnd, nullptr, FALSE);
     }
 }
@@ -465,7 +519,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
         return 0;
     case WM_TIMER:
+        if (wParam == FLASH_TIMER_ID)
+        {
+            if (!IsClearFlashActive())
+            {
+                KillTimer(hwnd, FLASH_TIMER_ID);
+            }
+            InvalidateRect(hwnd, nullptr, FALSE);
+            return 0;
+        }
+
         game.MoveBlockDown();
+        UpdateClearFlash(hwnd);
         SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
         InvalidateRect(hwnd, nullptr, FALSE);
         return 0;
@@ -491,6 +556,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     }
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_ID);
+        KillTimer(hwnd, FLASH_TIMER_ID);
         PostQuitMessage(0);
         return 0;
     default:
