@@ -147,6 +147,12 @@ cmake --build build --target tetris_core_tests
 ctest --test-dir build
 ```
 
+## Continuous Integration
+
+The repository includes a GitHub Actions workflow in `.github/workflows/ci.yml`.
+It configures CMake, builds the project, and runs `ctest` on Ubuntu, macOS, and
+Windows. The Windows job also builds the native Win32 GUI target.
+
 ## Build with VS Code
 
 1. Open `main.code-workspace` in VS Code.

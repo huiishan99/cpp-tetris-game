@@ -26,6 +26,23 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add cross-platform CI
+
+- Changed: Added a GitHub Actions workflow that configures CMake, builds the
+  project, and runs `ctest` on Ubuntu, macOS, and Windows. Added build
+  directory ignores and documented the CI workflow in the README.
+- Why: Catch core logic regressions across common development environments and
+  make future changes easier to trust.
+- Risk: The workflow has not run on GitHub from this environment; local CMake
+  and core test verification were used instead.
+- Verified: Local `cmake` was not available in this environment. Built with
+  `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp src/block.cpp
+  src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Check the first GitHub Actions run after pushing and adjust the
+  workflow if a hosted runner exposes any generator-specific issue.
+
 ### 2026-05-16 - Add three-block next queue
 
 - Changed: Added a three-block upcoming queue behind the existing next-block
