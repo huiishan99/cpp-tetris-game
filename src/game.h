@@ -9,6 +9,7 @@ class Game
 public:
     Game();
     Game(const Block &startingBlock, const Block &upcomingBlock);
+    Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid);
     void HandleInput(int key);
     void MoveBlockDown();
     const int (&GetGrid() const)[20][10];
@@ -21,12 +22,16 @@ public:
     int GetHeldBlockId() const;
     int GetScore() const;
     int GetLinesCleared() const;
+    int GetLastClearLines() const;
+    int GetLastClearScore() const;
+    int GetCombo() const;
     int GetLevel() const;
     int GetDropIntervalMs() const;
     bool IsGameOver() const;
     bool IsPaused() const;
     bool HasHeldBlock() const;
     bool CanHold() const;
+    static int CalculateLineClearScore(int completedLines);
     static int CalculateLevel(int completedLines);
     static int CalculateDropIntervalMs(int level);
 
@@ -60,4 +65,7 @@ private:
     bool holdUsed;
     int score;
     int linesCleared;
+    int lastClearLines;
+    int lastClearScore;
+    int combo;
 };

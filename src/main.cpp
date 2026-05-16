@@ -220,6 +220,23 @@ void DrawBlockPreview(HDC hdc, int x, int y, int width, int height,
     }
 }
 
+std::string GetClearLabel(int clearedLines)
+{
+    switch (clearedLines)
+    {
+    case 1:
+        return "SINGLE";
+    case 2:
+        return "DOUBLE";
+    case 3:
+        return "TRIPLE";
+    case 4:
+        return "TETRIS";
+    default:
+        return "";
+    }
+}
+
 void DrawStatusPanel(HDC hdc, int x, int y, int width)
 {
     std::string status = "PLAYING";
@@ -238,7 +255,18 @@ void DrawStatusPanel(HDC hdc, int x, int y, int width)
     FillRoundRectColor(hdc, x, y, x + width, y + 78, 8,
                        RGB(31, 35, 36), RGB(61, 70, 62));
     DrawTextLine(hdc, x + 14, y + 10, "Status", 16, RGB(170, 178, 158), FW_NORMAL);
-    DrawTextLine(hdc, x + 14, y + 34, status, 24, statusColor, FW_BOLD);
+    if (game.GetLastClearLines() > 0 && !game.IsGameOver() && !game.IsPaused())
+    {
+        std::string clearText = GetClearLabel(game.GetLastClearLines());
+        std::string scoreText = "+" + std::to_string(game.GetLastClearScore());
+        DrawTextLine(hdc, x + 14, y + 30, clearText, 22, RGB(249, 214, 124), FW_BOLD);
+        DrawTextLine(hdc, x + 104, y + 33, scoreText, 18, RGB(248, 244, 225), FW_BOLD);
+        DrawTextLine(hdc, x + 14, y + 56, "Combo x" + std::to_string(game.GetCombo()), 16, RGB(170, 178, 158), FW_NORMAL);
+    }
+    else
+    {
+        DrawTextLine(hdc, x + 14, y + 34, status, 24, statusColor, FW_BOLD);
+    }
 }
 
 void DrawGame(HDC hdc)

@@ -10,6 +10,7 @@ no graphics-library setup.
 - Classic Tetris movement
 - Score tracking
 - Line count and level progression
+- Line-clear feedback and combo counter
 - Hold-block swap
 - Next-block preview
 - Ghost landing preview
@@ -39,6 +40,7 @@ no graphics-library setup.
 - Soft drop: 1 point per row
 - Hard drop: 2 points per row
 - Line clear scoring: 100 / 300 / 500 / 800 points
+- Consecutive line-clearing locks increase the combo counter
 - Level increases every 10 cleared lines
 - Automatic drop speed increases with level, capped at a minimum interval
 

@@ -34,6 +34,9 @@ Game::Game()
     holdUsed = false;
     score = 0;
     linesCleared = 0;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    combo = 0;
 }
 
 Game::Game(const Block &startingBlock, const Block &upcomingBlock)
@@ -49,6 +52,27 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     holdUsed = false;
     score = 0;
     linesCleared = 0;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    combo = 0;
+}
+
+Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid)
+{
+    grid = initialGrid;
+    randomGenerator = std::mt19937(0);
+    blocks = GetAllBlocks();
+    currentBlock = startingBlock;
+    nextBlock = upcomingBlock;
+    gameOver = false;
+    paused = false;
+    hasHeldBlock = false;
+    holdUsed = false;
+    score = 0;
+    linesCleared = 0;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    combo = 0;
 }
 
 Block Game::GetRandomBlock()
@@ -136,6 +160,21 @@ int Game::GetLinesCleared() const
     return linesCleared;
 }
 
+int Game::GetLastClearLines() const
+{
+    return lastClearLines;
+}
+
+int Game::GetLastClearScore() const
+{
+    return lastClearScore;
+}
+
+int Game::GetCombo() const
+{
+    return combo;
+}
+
 int Game::GetLevel() const
 {
     return CalculateLevel(linesCleared);
@@ -164,6 +203,23 @@ bool Game::HasHeldBlock() const
 bool Game::CanHold() const
 {
     return !gameOver && !paused && !holdUsed;
+}
+
+int Game::CalculateLineClearScore(int completedLines)
+{
+    switch (completedLines)
+    {
+    case 1:
+        return 100;
+    case 2:
+        return 300;
+    case 3:
+        return 500;
+    case 4:
+        return 800;
+    default:
+        return 0;
+    }
 }
 
 int Game::CalculateLevel(int completedLines)
@@ -391,8 +447,17 @@ void Game::LockBlock()
     int rowsCleared = grid.ClearFullRows();
     if (rowsCleared > 0)
     {
+        combo++;
+        lastClearLines = rowsCleared;
+        lastClearScore = CalculateLineClearScore(rowsCleared);
         PlayLineClearSound();
         UpdateScore(rowsCleared, 0);
+    }
+    else
+    {
+        combo = 0;
+        lastClearLines = 0;
+        lastClearScore = 0;
     }
 }
 
@@ -449,28 +514,14 @@ void Game::Reset()
     holdUsed = false;
     score = 0;
     linesCleared = 0;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    combo = 0;
 }
 
 void Game::UpdateScore(int linesCompleted, int moveDownPoints)
 {
-    switch (linesCompleted)
-    {
-    case 1:
-        score += 100;
-        break;
-    case 2:
-        score += 300;
-        break;
-    case 3:
-        score += 500;
-        break;
-    case 4:
-        score += 800;
-        break;
-    default:
-        break;
-    }
-
+    score += CalculateLineClearScore(linesCompleted);
     linesCleared += linesCompleted;
     score += moveDownPoints;
 }

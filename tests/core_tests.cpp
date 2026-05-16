@@ -193,8 +193,36 @@ void TestHoldStoresCurrentBlockOncePerDrop()
     Expect(game.CanHold(), "hold unlocks after the active block lands");
 }
 
+void TestLineClearFeedbackAndComboReset()
+{
+    Grid grid;
+    for (int column = 0; column < 10; column++)
+    {
+        if (column < 3 || column > 6)
+        {
+            grid.grid[19][column] = 7;
+        }
+    }
+
+    Game game{IBlock(), OBlock(), grid};
+    game.HandleInput(' ');
+
+    Expect(game.GetLastClearLines() == 1, "line clear feedback stores cleared line count");
+    Expect(game.GetLastClearScore() == 100, "line clear feedback stores clear score");
+    Expect(game.GetCombo() == 1, "first clear starts combo at one");
+    Expect(game.GetLinesCleared() == 1, "game tracks total cleared lines after lock");
+
+    game.HandleInput(' ');
+
+    Expect(game.GetLastClearLines() == 0, "non-clear lock resets clear line feedback");
+    Expect(game.GetLastClearScore() == 0, "non-clear lock resets clear score feedback");
+    Expect(game.GetCombo() == 0, "non-clear lock resets combo");
+}
+
 void TestLevelAndDropSpeedProgression()
 {
+    Expect(Game::CalculateLineClearScore(0) == 0, "zero lines score zero line-clear points");
+    Expect(Game::CalculateLineClearScore(4) == 800, "four-line clear uses Tetris score");
     Expect(Game::CalculateLevel(0) == 1, "level starts at one");
     Expect(Game::CalculateLevel(9) == 1, "level stays one before ten lines");
     Expect(Game::CalculateLevel(10) == 2, "level increases every ten lines");
@@ -215,6 +243,7 @@ int main()
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();
     TestHoldStoresCurrentBlockOncePerDrop();
+    TestLineClearFeedbackAndComboReset();
     TestLevelAndDropSpeedProgression();
 
     std::cout << "All core tests passed." << std::endl;

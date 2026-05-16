@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add clear feedback and combo
+
+- Changed: Added last-clear line/score tracking, combo state, a test constructor
+  that accepts a starting grid, status-panel clear feedback, and core tests for
+  line-clear feedback reset behavior.
+- Why: Make line clears feel more responsive and easier to read than score
+  changes alone.
+- Risk: Locking now resets combo/feedback on non-clearing pieces; Win32 GUI
+  build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add a short visual flash on the board itself once the Win32 build
+  can be checked interactively.
+
 ### 2026-05-16 - Add rotation kick assist
 
 - Changed: Added simple wall/spawn kick offsets for rotation, a deterministic
