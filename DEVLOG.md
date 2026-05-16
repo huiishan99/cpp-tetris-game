@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Make core logic portable
+
+- Changed: Added `src/sound.h`, `src/sound.cpp`, moved Windows `Beep` calls out
+  of `Game`, changed CMake to build a `tetris_core` library, and added
+  `tests/core_tests.cpp`.
+- Why: Let the game rules compile outside the Win32 GUI so future gameplay work
+  can be tested on more environments.
+- Risk: Windows sound behavior now goes through a wrapper; CMake target layout
+  changed.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add more tests around locking, game-over, hard drop scoring, and
+  future gameplay features.
+
 ### 2026-05-16 - Add CMake Windows build
 
 - Changed: Added `CMakeLists.txt` and documented MinGW/Visual Studio CMake

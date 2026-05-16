@@ -28,6 +28,8 @@ no graphics-library setup.
 
 ## Requirements
 
+### Full Windows GUI
+
 - Windows
 - A C++ compiler such as MinGW-w64 `g++`
 - CMake is optional, but recommended for Visual Studio, Ninja, and other IDEs
@@ -35,6 +37,12 @@ no graphics-library setup.
 
 You do not need Raylib, `C:\raylib`, fonts, image assets, or audio files for
 this Windows GUI version.
+
+### Portable Core Tests
+
+- macOS, Linux, or Windows
+- Any C++17 compiler
+- CMake is optional
 
 ## Check Whether `g++` Is Installed
 
@@ -95,6 +103,26 @@ Run:
 .\main.exe
 ```
 
+## Run Core Tests
+
+The game rules can be compiled without the Win32 GUI. This is useful on macOS
+or Linux, and it helps catch logic regressions before touching rendering code.
+
+With a local C++ compiler:
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp src/sound.cpp -o /tmp/tetris_core_tests
+/tmp/tetris_core_tests
+```
+
+With CMake:
+
+```bash
+cmake -S . -B build
+cmake --build build --target tetris_core_tests
+ctest --test-dir build
+```
+
 ## Build with VS Code
 
 1. Open `main.code-workspace` in VS Code.
@@ -111,6 +139,9 @@ src/
   grid.cpp       Tetris board and row clearing
   block.cpp      Shared block behavior
   blocks.cpp     Individual Tetris block shapes
+  sound.cpp      Small sound adapter; no-op outside Windows
+tests/
+  core_tests.cpp Portable game-logic checks
 ```
 
 ## Development Log
@@ -121,8 +152,8 @@ changed, why it changed, the risk, verification steps, and any follow-up work.
 ## Portability Note
 
 The current game window is built directly on the Win32 API, so the full game
-currently targets Windows. Future work can split the game rules from the
-renderer so the core can be tested on macOS/Linux and reused by other frontends.
+currently targets Windows. The rules layer now builds without the GUI, so future
+frontends can reuse the same game logic.
 
 ## Troubleshooting
 

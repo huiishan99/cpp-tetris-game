@@ -1,5 +1,5 @@
 #include "game.h"
-#include <windows.h>
+#include "sound.h"
 
 Game::Game()
 {
@@ -164,7 +164,7 @@ void Game::RotateBlock()
         }
         else
         {
-            Beep(880, 25);
+            PlayRotateSound();
         }
     }
 }
@@ -185,7 +185,7 @@ void Game::LockBlock()
     int rowsCleared = grid.ClearFullRows();
     if (rowsCleared > 0)
     {
-        Beep(660, 60);
+        PlayLineClearSound();
         UpdateScore(rowsCleared, 0);
     }
 }
