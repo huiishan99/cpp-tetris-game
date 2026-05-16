@@ -463,7 +463,7 @@ void DrawStateOverlay(HDC hdc)
     }
     else if (game.IsPaused())
     {
-        DrawOverlayPanel(hdc, "PAUSED", "PRESS P",
+        DrawOverlayPanel(hdc, "PAUSED", "P / ESC",
                          "Score " + std::to_string(game.GetScore()),
                          RGB(241, 194, 100));
     }
@@ -657,6 +657,9 @@ void HandleGameKey(HWND hwnd, WPARAM key)
         break;
     case VK_SHIFT:
         input = 'c';
+        break;
+    case VK_ESCAPE:
+        input = (game.IsStarted() && !game.IsGameOver()) ? 'p' : 0;
         break;
     case 'C':
     case 'A':

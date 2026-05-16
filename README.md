@@ -38,7 +38,7 @@ no graphics-library setup.
 | Up Arrow or W | Rotate block |
 | Space | Drop block instantly |
 | C or Shift | Hold or swap block |
-| P | Pause or resume |
+| P or Esc | Pause or resume |
 | Any non-Q key after game over | Restart |
 | Q | Quit |
 

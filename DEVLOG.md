@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Make pause easier to reach
+
+- Changed: Added `Esc` as a Win32 pause/resume key alongside `P`, updated the
+  pause overlay action prompt, and documented the shortcut in the controls
+  table.
+- Why: Pause existed, but it was too easy to miss during play; `Esc` is a more
+  natural panic-pause key.
+- Risk: `Esc` is ignored on the start and game-over screens to avoid accidental
+  starts or restarts; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Consider adding a small menu pause screen later if settings or
+  restart confirmation are added.
+
 ### 2026-05-16 - Add T-spin feedback and pixel font
 
 - Changed: Added T-spin single/double/triple bonus scoring, corner-based T-spin
