@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add session best score
+
+- Changed: Added session high-score tracking, a public `Restart()` path that
+  preserves the best score, Best score display in the side panel, and core tests
+  for restart/high-score behavior and blocked soft-drop scoring.
+- Why: Give players a simple score target across restarts without adding file
+  persistence yet.
+- Risk: High score is in-memory only and resets when the program closes; soft
+  drop scoring now only counts successful downward movement. Win32 GUI build was
+  not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add optional file-backed high-score persistence later.
+
 ### 2026-05-16 - Add clear feedback and combo
 
 - Changed: Added last-clear line/score tracking, combo state, a test constructor

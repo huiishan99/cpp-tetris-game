@@ -33,6 +33,7 @@ Game::Game()
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
+    highScore = 0;
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
@@ -51,6 +52,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
+    highScore = 0;
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
@@ -69,6 +71,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
+    highScore = 0;
     linesCleared = 0;
     lastClearLines = 0;
     lastClearScore = 0;
@@ -153,6 +156,11 @@ int Game::GetHeldBlockId() const
 int Game::GetScore() const
 {
     return score;
+}
+
+int Game::GetHighScore() const
+{
+    return highScore;
 }
 
 int Game::GetLinesCleared() const
@@ -250,7 +258,7 @@ void Game::HandleInput(int key)
 {
     if (gameOver && key != 0)
     {
-        Reset();
+        Restart();
         return;
     }
 
@@ -281,8 +289,10 @@ void Game::HandleInput(int key)
         break;
     case 's':
     case 'S':
-        MoveBlockDown();
-        UpdateScore(0, 1);
+        if (MoveBlockDown())
+        {
+            UpdateScore(0, 1);
+        }
         break;
     case 'w':
     case 'W':
@@ -292,6 +302,11 @@ void Game::HandleInput(int key)
         DropBlock();
         break;
     }
+}
+
+void Game::Restart()
+{
+    Reset();
 }
 
 void Game::MoveBlockLeft()
@@ -318,7 +333,7 @@ void Game::MoveBlockRight()
     }
 }
 
-void Game::MoveBlockDown()
+bool Game::MoveBlockDown()
 {
     if (!gameOver && !paused)
     {
@@ -327,8 +342,11 @@ void Game::MoveBlockDown()
         {
             currentBlock.Move(-1, 0);
             LockBlock();
+            return false;
         }
+        return true;
     }
+    return false;
 }
 
 void Game::DropBlock()
@@ -524,6 +542,15 @@ void Game::UpdateScore(int linesCompleted, int moveDownPoints)
     score += CalculateLineClearScore(linesCompleted);
     linesCleared += linesCompleted;
     score += moveDownPoints;
+    UpdateHighScore();
+}
+
+void Game::UpdateHighScore()
+{
+    if (score > highScore)
+    {
+        highScore = score;
+    }
 }
 
 void Game::TogglePause()

@@ -136,6 +136,32 @@ void TestSoftDropScoresOnePoint()
     Expect(game.GetScore() == startingScore + 1, "soft drop scores one point");
 }
 
+void TestBlockedSoftDropDoesNotScore()
+{
+    OBlock block;
+    block.Move(18, 0);
+    Game game{block, IBlock()};
+
+    game.HandleInput('s');
+
+    Expect(game.GetScore() == 0, "blocked soft drop does not score");
+    Expect(game.GetHighScore() == 0, "blocked soft drop does not update high score");
+}
+
+void TestHighScoreSurvivesRestart()
+{
+    Game game;
+
+    game.HandleInput('s');
+    Expect(game.GetScore() == 1, "soft drop creates a score for high score tracking");
+    Expect(game.GetHighScore() == 1, "high score updates when score increases");
+
+    game.Restart();
+
+    Expect(game.GetScore() == 0, "restart clears current score");
+    Expect(game.GetHighScore() == 1, "restart keeps session high score");
+}
+
 void TestPauseStopsAutomaticDrop()
 {
     Game game;
@@ -239,6 +265,8 @@ int main()
     TestBlockRotationCycles();
     TestRotationKickAllowsIBlockToRotateAtTop();
     TestSoftDropScoresOnePoint();
+    TestBlockedSoftDropDoesNotScore();
+    TestHighScoreSurvivesRestart();
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();

@@ -322,6 +322,8 @@ void DrawGame(HDC hdc)
 
     DrawMetricPanel(hdc, panelX, BOARD_TOP + 10, panelWidth, 86,
                     "Score", std::to_string(game.GetScore()));
+    DrawTextLine(hdc, panelX + 14, BOARD_TOP + 72,
+                 "Best " + std::to_string(game.GetHighScore()), 15, RGB(170, 178, 158), FW_NORMAL);
     DrawMetricPanel(hdc, panelX, BOARD_TOP + 112, (panelWidth - 12) / 2, 78,
                     "Lines", std::to_string(game.GetLinesCleared()));
     DrawMetricPanel(hdc, panelX + (panelWidth + 12) / 2, BOARD_TOP + 112,

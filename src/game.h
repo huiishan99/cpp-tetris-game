@@ -11,7 +11,8 @@ public:
     Game(const Block &startingBlock, const Block &upcomingBlock);
     Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &initialGrid);
     void HandleInput(int key);
-    void MoveBlockDown();
+    void Restart();
+    bool MoveBlockDown();
     const int (&GetGrid() const)[20][10];
     std::vector<Position> GetCurrentBlockCells() const;
     std::vector<Position> GetGhostBlockCells() const;
@@ -21,6 +22,7 @@ public:
     int GetNextBlockId() const;
     int GetHeldBlockId() const;
     int GetScore() const;
+    int GetHighScore() const;
     int GetLinesCleared() const;
     int GetLastClearLines() const;
     int GetLastClearScore() const;
@@ -52,6 +54,7 @@ private:
     bool BlockFits(const Block &block) const;
     void Reset();
     void UpdateScore(int LinesCleared, int moveDownPoints);
+    void UpdateHighScore();
     void TogglePause();
     Grid grid;
     std::vector<Block> blocks;
@@ -64,6 +67,7 @@ private:
     bool hasHeldBlock;
     bool holdUsed;
     int score;
+    int highScore;
     int linesCleared;
     int lastClearLines;
     int lastClearScore;
