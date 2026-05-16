@@ -1,145 +1,76 @@
-# C++ Tetris Game
+# Native C++ Tetris
 
-A small Tetris game written in C++ with a native Windows GUI.
+A fast, native Windows Tetris built with C++ and the Win32 API. No Raylib, no
+engine, no asset pipeline to set up. Just build it and play.
 
-This version does **not** use Raylib. It only needs a C++ compiler, so there is
-no graphics-library setup.
+The game has grown from a small practice project into a sharper arcade-style
+Tetris with hold, ghost piece, spin clears, combo feedback, persistent best
+score, and a dark pixel UI.
 
-## Features
+## Why It Feels Good
 
-- Classic Tetris movement
-- Score tracking
-- Persistent best score tracking
-- Start, pause, and game-over overlay panels
-- Line count and level progression
-- Level-up status feedback
-- Line-clear feedback and combo counter
-- Faster delayed line-clear flash animation
-- T-spin clear detection and bonus scoring
-- Style-spin detection for L/J/I/S/Z clears
-- Hold-block swap
-- Three-block next queue preview
-- Ghost landing preview
-- Rotation kick assist near walls and the spawn top
-- Pause and resume
-- Soft drop and instant drop
-- Polished dark pixel-style UI with block preview and status panels
-- Native Windows window rendering
-- Small Windows beep sounds for movement, drops, hold, rotate, row clear,
-  pause, and game over
+- Hold, ghost landing, and a three-piece next queue for planning ahead
+- T-spin scoring plus custom L/J/I/S/Z style-spin clears
+- Faster line-clear flash, combo feedback, level-up feedback, and best score
+- Start, pause, restart, and game-over overlays
+- Pixel-style font with compact Win32 rendering
+- Lightweight sound cues for moves, drops, hold, rotate, clears, pause, and game over
 
 ## Controls
 
 | Key | Action |
 | --- | --- |
-| Any non-Q key on start screen | Start |
-| Left Arrow or A | Move block left |
-| Right Arrow or D | Move block right |
-| Down Arrow or S | Soft drop |
-| Up Arrow or W | Rotate block |
-| Space | Drop block instantly |
-| C or Shift | Hold or swap block |
+| Any key on READY | Start |
+| Left / Right or A / D | Move |
+| Down or S | Soft drop |
+| Up or W | Rotate |
+| Space | Hard drop |
+| C or Shift | Hold |
 | P or Esc | Pause |
 | Any key while paused | Resume |
-| R | Restart current game |
-| Any non-Q key after game over | Restart |
+| R | Restart |
 | Q | Quit |
 
-## Scoring and Pace
+## Scoring
 
-- Soft drop: 1 point per successful row
-- Hard drop: 2 points per row
-- Line clear scoring: 100 / 300 / 500 / 800 points
-- T-spin clear scoring: 800 / 1200 / 1600 points
-- Style-spin clear scoring: 400 / 700 / 1000 / 1200 points
-- Consecutive line-clearing locks increase the combo counter
-- Level increases every 10 cleared lines
-- Automatic drop speed increases with level, capped at a minimum interval
-- Best score is saved to `tetris_highscore.txt` in the working directory
+| Action | Points |
+| --- | --- |
+| Soft drop | 1 per row |
+| Hard drop | 2 per row |
+| Line clear | 100 / 300 / 500 / 800 |
+| T-spin clear | 800 / 1200 / 1600 |
+| Style-spin clear | 400 / 700 / 1000 / 1200 |
 
-## Requirements
+Level increases every 10 cleared lines. The drop speed ramps up as the level
+rises, and the best score is saved to `tetris_highscore.txt`.
 
-### Full Windows GUI
+## Build And Play
 
-- Windows
-- A C++ compiler such as MinGW-w64 `g++`
-- CMake is optional, but recommended for Visual Studio, Ninja, and other IDEs
-- VS Code is optional
-
-You do not need Raylib, `C:\raylib`, fonts, image assets, or audio files for
-this Windows GUI version.
-
-### Portable Core Tests
-
-- macOS, Linux, or Windows
-- Any C++17 compiler
-- CMake is optional
-
-## Check Whether `g++` Is Installed
-
-Open PowerShell and run:
-
-```powershell
-g++ --version
-```
-
-If you see version information, you can build the game.
-
-If PowerShell says `g++` is not recognized, install a C++ compiler first. A
-common option is MinGW-w64. After installation, make sure the compiler's `bin`
-folder is added to your Windows `PATH`.
-
-## Build and Run
-
-Open PowerShell in the project folder:
-
-```powershell
-cd C:\dev\cpp-tetris-game
-```
-
-Build:
-
-```powershell
-g++ -std=c++17 -Wall -Wextra src\*.cpp -mwindows -lgdi32 -luser32 -o main.exe
-```
-
-Or use the included batch file:
+On Windows, open PowerShell in the project folder:
 
 ```powershell
 .\build.bat
+.\main.exe
 ```
 
-`build.bat` uses `g++` when it is available. If you run it from a Visual Studio
-Developer Command Prompt, it can also build with `cl`.
-
-Or use CMake with MinGW:
+Or build directly with MinGW-w64:
 
 ```powershell
-cmake -S . -B build -G "MinGW Makefiles"
-cmake --build build
-.\build\main.exe
+g++ -std=c++17 -Wall -Wextra src\*.cpp -mwindows -lgdi32 -luser32 -o main.exe
+.\main.exe
 ```
 
-Or use CMake with Visual Studio:
+Or use CMake:
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022"
+cmake -S . -B build
 cmake --build build --config Release
 .\build\Release\main.exe
 ```
 
-Run:
+## Core Tests
 
-```powershell
-.\main.exe
-```
-
-## Run Core Tests
-
-The game rules can be compiled without the Win32 GUI. This is useful on macOS
-or Linux, and it helps catch logic regressions before touching rendering code.
-
-With a local C++ compiler:
+The game rules are portable and can be tested without the Win32 window:
 
 ```bash
 c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp src/position.cpp src/sound.cpp -o /tmp/tetris_core_tests
@@ -154,67 +85,15 @@ cmake --build build --target tetris_core_tests
 ctest --test-dir build
 ```
 
-## Continuous Integration
-
-The repository includes a GitHub Actions workflow in `.github/workflows/ci.yml`.
-It configures CMake, builds the project, and runs `ctest` on Ubuntu, macOS, and
-Windows. The Windows job also builds the native Win32 GUI target.
-
-## Build with VS Code
-
-1. Open `main.code-workspace` in VS Code.
-2. Press `Ctrl + Shift + B`.
-3. Choose `build debug` or `build release`.
-4. Run `.\main.exe`, or use the `Run Windows Tetris` launch configuration.
-
-## Project Structure
+## Project Map
 
 ```text
-src/
-  main.cpp       Windows GUI, drawing, input, and game loop
-  game.cpp       Game state, scoring, movement, rotation, beep sounds
-  grid.cpp       Tetris board and row clearing
-  high_score.cpp Best-score file loading and saving
-  block.cpp      Shared block behavior
-  blocks.cpp     Individual Tetris block shapes
-  sound.cpp      Small sound adapter; no-op outside Windows
-tests/
-  core_tests.cpp Portable game-logic checks
+src/main.cpp        Win32 window, drawing, input, timers
+src/game.cpp        Game rules, scoring, hold, spin detection
+src/grid.cpp        Board storage and row clearing
+src/high_score.cpp  Best-score file
+src/sound.cpp       Tiny Windows beep cues, no-op elsewhere
+tests/core_tests.cpp
 ```
 
-## Development Log
-
-Every repository change should include a new entry in `DEVLOG.md`. Record what
-changed, why it changed, the risk, verification steps, and any follow-up work.
-
-## Portability Note
-
-The current game window is built directly on the Win32 API, so the full game
-currently targets Windows. The rules layer now builds without the GUI, so future
-frontends can reuse the same game logic.
-
-## Troubleshooting
-
-### Space key does not drop the block
-
-Rebuild the project first. Source code changes do not update `main.exe`
-automatically.
-
-```powershell
-g++ -std=c++17 -Wall -Wextra src\*.cpp -mwindows -lgdi32 -luser32 -o main.exe
-.\main.exe
-```
-
-### `g++` is not recognized
-
-Your compiler is not installed or not on `PATH`. Install MinGW-w64 or another
-C++ compiler, then reopen PowerShell and try:
-
-```powershell
-g++ --version
-```
-
-### The window does not open
-
-Make sure the build succeeded and `main.exe` was updated. If the compiler is not
-installed, `build.bat` will fail before creating the GUI executable.
+CI runs the portable core tests on Ubuntu, macOS, and Windows.

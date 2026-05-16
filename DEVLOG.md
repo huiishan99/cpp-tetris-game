@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Rewrite README for players
+
+- Changed: Rewrote `README.md` into a shorter, more player-focused project
+  page with a stronger intro, clearer feature highlights, compact controls,
+  scoring tables, and trimmed build/test instructions.
+- Why: Make the project look more inviting and remove overly procedural or
+  unrelated README content.
+- Risk: Some detailed troubleshooting text was removed; the remaining build
+  commands should cover the normal paths.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add a gameplay screenshot or GIF after the next Windows visual
+  pass.
+
 ### 2026-05-16 - Add style-spin clears
 
 - Changed: Added immobile style-spin detection for L/J/I/S/Z pieces after a
