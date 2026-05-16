@@ -19,9 +19,11 @@ public:
     std::vector<Position> GetCurrentBlockCells() const;
     std::vector<Position> GetGhostBlockCells() const;
     std::vector<Position> GetNextBlockCells() const;
+    std::vector<std::vector<Position>> GetUpcomingBlockCells() const;
     std::vector<Position> GetHeldBlockCells() const;
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
+    std::vector<int> GetUpcomingBlockIds() const;
     int GetHeldBlockId() const;
     int GetScore() const;
     int GetHighScore() const;
@@ -59,6 +61,8 @@ private:
     void LockBlock();
     void StartLineClear(const std::vector<int> &fullRows);
     void SpawnNextBlock();
+    Block AdvanceNextBlock();
+    void FillUpcomingBlocks();
     bool BlockFits() const;
     bool BlockFits(const Block &block) const;
     void Reset();
@@ -69,6 +73,7 @@ private:
     std::vector<Block> blocks;
     Block currentBlock;
     Block nextBlock;
+    std::vector<Block> upcomingBlocks;
     Block heldBlock;
     std::mt19937 randomGenerator;
     bool gameOver;

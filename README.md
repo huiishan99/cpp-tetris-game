@@ -15,7 +15,7 @@ no graphics-library setup.
 - Line-clear feedback and combo counter
 - Delayed line-clear flash animation
 - Hold-block swap
-- Next-block preview
+- Three-block next queue preview
 - Ghost landing preview
 - Rotation kick assist near walls and the spawn top
 - Pause and resume

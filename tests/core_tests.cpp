@@ -241,6 +241,28 @@ void TestNextBlockPreviewHasFourCells()
     Expect(game.GetNextBlockCells().size() == 4, "next block preview exposes four cells");
 }
 
+void TestUpcomingBlockQueueAdvances()
+{
+    Game game;
+    std::vector<int> startingIds = game.GetUpcomingBlockIds();
+    std::vector<std::vector<Position>> startingCells = game.GetUpcomingBlockCells();
+
+    Expect(startingIds.size() == 3, "upcoming queue exposes three block ids");
+    Expect(startingCells.size() == 3, "upcoming queue exposes three block previews");
+    Expect(startingIds[0] == game.GetNextBlockId(), "upcoming queue starts with the next block");
+    for (const std::vector<Position> &cells : startingCells)
+    {
+        Expect(cells.size() == 4, "each upcoming preview has four cells");
+    }
+
+    game.Start();
+    game.HandleInput('c');
+
+    Expect(game.GetCurrentBlockId() == startingIds[0], "hold advances the first queued block into play");
+    Expect(game.GetNextBlockId() == startingIds[1], "hold promotes the second queued block to next");
+    Expect(game.GetUpcomingBlockIds().size() == 3, "upcoming queue refills after advancing");
+}
+
 void TestHoldStoresCurrentBlockOncePerDrop()
 {
     Game game;
@@ -348,6 +370,7 @@ int main()
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();
+    TestUpcomingBlockQueueAdvances();
     TestHoldStoresCurrentBlockOncePerDrop();
     TestLineClearFeedbackAndComboReset();
     TestLevelAndDropSpeedProgression();

@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add three-block next queue
+
+- Changed: Added a three-block upcoming queue behind the existing next-block
+  API, advanced the queue through hold/spawn flow, rendered the Next panel as
+  three compact previews, and added core tests for queue size and promotion.
+- Why: Give players more planning information and make Hold decisions more
+  strategic without changing the basic rules.
+- Risk: Queue advancement touches block spawning and Hold behavior; Win32 GUI
+  build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Recheck Next panel spacing on Windows and consider a five-block
+  queue if the sidebar is redesigned later.
+
 ### 2026-05-16 - Add richer action sounds
 
 - Changed: Added separate lightweight Win32 beep cues for movement, soft drop,

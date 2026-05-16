@@ -7,6 +7,7 @@ const int LinesPerLevel = 10;
 const int BaseDropIntervalMs = 350;
 const int DropIntervalStepMs = 25;
 const int MinimumDropIntervalMs = 100;
+const int UpcomingPreviewCount = 3;
 
 const Position WallKickOffsets[] = {
     Position(0, 0),
@@ -26,8 +27,11 @@ Game::Game()
     grid = Grid();
     randomGenerator = std::mt19937(std::random_device{}());
     blocks = GetAllBlocks();
+    upcomingBlocks.clear();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
+    FillUpcomingBlocks();
+    FillUpcomingBlocks();
     gameOver = false;
     started = false;
     paused = false;
@@ -50,6 +54,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     blocks = GetAllBlocks();
     currentBlock = startingBlock;
     nextBlock = upcomingBlock;
+    FillUpcomingBlocks();
     gameOver = false;
     started = false;
     paused = false;
@@ -72,6 +77,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     blocks = GetAllBlocks();
     currentBlock = startingBlock;
     nextBlock = upcomingBlock;
+    FillUpcomingBlocks();
     gameOver = false;
     started = false;
     paused = false;
@@ -143,6 +149,17 @@ std::vector<Position> Game::GetNextBlockCells() const
     return nextBlock.GetCellPositions();
 }
 
+std::vector<std::vector<Position>> Game::GetUpcomingBlockCells() const
+{
+    std::vector<std::vector<Position>> cells;
+    cells.push_back(nextBlock.GetCellPositions());
+    for (const Block &block : upcomingBlocks)
+    {
+        cells.push_back(block.GetCellPositions());
+    }
+    return cells;
+}
+
 std::vector<Position> Game::GetHeldBlockCells() const
 {
     if (!hasHeldBlock)
@@ -160,6 +177,17 @@ int Game::GetCurrentBlockId() const
 int Game::GetNextBlockId() const
 {
     return nextBlock.id;
+}
+
+std::vector<int> Game::GetUpcomingBlockIds() const
+{
+    std::vector<int> ids;
+    ids.push_back(nextBlock.id);
+    for (const Block &block : upcomingBlocks)
+    {
+        ids.push_back(block.id);
+    }
+    return ids;
 }
 
 int Game::GetHeldBlockId() const
@@ -462,8 +490,7 @@ void Game::HoldBlock()
     {
         heldBlock = previousCurrent;
         hasHeldBlock = true;
-        currentBlock = nextBlock;
-        nextBlock = GetRandomBlock();
+        currentBlock = AdvanceNextBlock();
     }
     else
     {
@@ -581,7 +608,7 @@ void Game::FinishLineClear()
 
 void Game::SpawnNextBlock()
 {
-    currentBlock = nextBlock;
+    currentBlock = AdvanceNextBlock();
     if (BlockFits() == false)
     {
         gameOver = true;
@@ -589,7 +616,36 @@ void Game::SpawnNextBlock()
         paused = false;
         PlayGameOverSound();
     }
-    nextBlock = GetRandomBlock();
+}
+
+Block Game::AdvanceNextBlock()
+{
+    Block advancedBlock = nextBlock;
+    if (upcomingBlocks.empty())
+    {
+        FillUpcomingBlocks();
+    }
+
+    if (!upcomingBlocks.empty())
+    {
+        nextBlock = upcomingBlocks.front();
+        upcomingBlocks.erase(upcomingBlocks.begin());
+    }
+    else
+    {
+        nextBlock = GetRandomBlock();
+    }
+
+    FillUpcomingBlocks();
+    return advancedBlock;
+}
+
+void Game::FillUpcomingBlocks()
+{
+    while (static_cast<int>(upcomingBlocks.size()) < UpcomingPreviewCount - 1)
+    {
+        upcomingBlocks.push_back(GetRandomBlock());
+    }
 }
 
 bool Game::BlockFits() const

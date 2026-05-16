@@ -245,6 +245,86 @@ void DrawBlockPreview(HDC hdc, int x, int y, int width, int height,
     }
 }
 
+void DrawBlockQueuePreview(HDC hdc, int x, int y, int width, int height,
+                           const std::string &label,
+                           const std::vector<std::vector<Position>> &blocks,
+                           const std::vector<int> &blockIds)
+{
+    FillRoundRectColor(hdc, x, y, x + width, y + height, 8,
+                       RGB(31, 35, 36), RGB(61, 70, 62));
+    DrawTextLine(hdc, x + 14, y + 10, label, 16, RGB(170, 178, 158), FW_NORMAL);
+
+    int count = static_cast<int>(blocks.size());
+    if (static_cast<int>(blockIds.size()) < count)
+    {
+        count = static_cast<int>(blockIds.size());
+    }
+    if (count <= 0)
+    {
+        return;
+    }
+
+    const int slotGap = 8;
+    const int innerLeft = x + 12;
+    const int contentTop = y + 42;
+    const int contentHeight = height - 52;
+    const int slotWidth = (width - 24 - slotGap * (count - 1)) / count;
+    const int previewCellSize = 15;
+
+    for (int index = 0; index < count; index++)
+    {
+        const std::vector<Position> &cells = blocks[index];
+        if (cells.empty())
+        {
+            continue;
+        }
+
+        int slotLeft = innerLeft + index * (slotWidth + slotGap);
+        if (index > 0)
+        {
+            FillRectColor(hdc, slotLeft - slotGap / 2, contentTop + 8,
+                          slotLeft - slotGap / 2 + 1, contentTop + contentHeight - 8,
+                          RGB(57, 65, 57));
+        }
+
+        int minRow = cells[0].row;
+        int maxRow = cells[0].row;
+        int minColumn = cells[0].column;
+        int maxColumn = cells[0].column;
+        for (Position cell : cells)
+        {
+            if (cell.row < minRow)
+            {
+                minRow = cell.row;
+            }
+            if (cell.row > maxRow)
+            {
+                maxRow = cell.row;
+            }
+            if (cell.column < minColumn)
+            {
+                minColumn = cell.column;
+            }
+            if (cell.column > maxColumn)
+            {
+                maxColumn = cell.column;
+            }
+        }
+
+        int shapeWidth = (maxColumn - minColumn + 1) * previewCellSize;
+        int shapeHeight = (maxRow - minRow + 1) * previewCellSize;
+        int originX = slotLeft + (slotWidth - shapeWidth) / 2;
+        int originY = contentTop + (contentHeight - shapeHeight) / 2;
+
+        for (Position cell : cells)
+        {
+            int cellX = originX + (cell.column - minColumn) * previewCellSize;
+            int cellY = originY + (cell.row - minRow) * previewCellSize;
+            DrawCellAt(hdc, cellX, cellY, previewCellSize, blockIds[index]);
+        }
+    }
+}
+
 std::string GetClearLabel(int clearedLines)
 {
     switch (clearedLines)
@@ -474,8 +554,8 @@ void DrawGame(HDC hdc)
                     (panelWidth - 12) / 2, 78, "Level", std::to_string(game.GetLevel()));
     DrawBlockPreview(hdc, panelX, BOARD_TOP + 208, panelWidth, 126,
                      "Hold", game.GetHeldBlockCells(), game.GetHeldBlockId(), !game.CanHold());
-    DrawBlockPreview(hdc, panelX, BOARD_TOP + 350, panelWidth, 126,
-                     "Next", game.GetNextBlockCells(), game.GetNextBlockId(), false);
+    DrawBlockQueuePreview(hdc, panelX, BOARD_TOP + 350, panelWidth, 126,
+                          "Next", game.GetUpcomingBlockCells(), game.GetUpcomingBlockIds());
     DrawStatusPanel(hdc, panelX, BOARD_TOP + 486, panelWidth);
     DrawStateOverlay(hdc);
 }
