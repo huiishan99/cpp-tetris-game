@@ -11,6 +11,7 @@ set(TETRIS_CORE_SOURCES
     src/blocks.cpp
     src/game.cpp
     src/grid.cpp
+    src/high_score.cpp
     src/position.cpp
     src/sound.cpp
 )

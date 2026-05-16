@@ -1,8 +1,11 @@
 #include "blocks.h"
 #include "game.h"
 #include "grid.h"
+#include "high_score.h"
 
+#include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -162,6 +165,24 @@ void TestHighScoreSurvivesRestart()
     Expect(game.GetHighScore() == 1, "restart keeps session high score");
 }
 
+void TestHighScoreFilePersistence()
+{
+    const char *path = "tetris_highscore_test.tmp";
+    std::remove(path);
+
+    Expect(LoadHighScore(path) == 0, "missing high score file loads as zero");
+    Expect(SaveHighScore(path, 1234), "high score file saves successfully");
+    Expect(LoadHighScore(path) == 1234, "saved high score can be loaded");
+
+    {
+        std::ofstream file(path, std::ios::trunc);
+        file << "not-a-score\n";
+    }
+    Expect(LoadHighScore(path) == 0, "invalid high score file loads as zero");
+
+    std::remove(path);
+}
+
 void TestPauseStopsAutomaticDrop()
 {
     Game game;
@@ -267,6 +288,7 @@ int main()
     TestSoftDropScoresOnePoint();
     TestBlockedSoftDropDoesNotScore();
     TestHighScoreSurvivesRestart();
+    TestHighScoreFilePersistence();
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();

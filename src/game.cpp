@@ -163,6 +163,15 @@ int Game::GetHighScore() const
     return highScore;
 }
 
+void Game::SetHighScore(int value)
+{
+    if (value < score)
+    {
+        value = score;
+    }
+    highScore = value;
+}
+
 int Game::GetLinesCleared() const
 {
     return linesCleared;

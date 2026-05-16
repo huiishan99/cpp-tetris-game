@@ -26,6 +26,24 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Persist best score
+
+- Changed: Added `src/high_score.h`, `src/high_score.cpp`, high-score loading
+  on startup, saving on shutdown, `.gitignore` entries for generated score
+  files, CMake source wiring, and core tests for missing/saved/invalid score
+  files.
+- Why: Keep the Best score across program runs instead of limiting it to one
+  session.
+- Risk: The score file is a simple text file in the working directory, so
+  changing launch directories changes which high-score file is used. Win32 GUI
+  build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Save beside the executable or in a platform user-data folder if
+  launch-directory independence becomes important.
+
 ### 2026-05-16 - Add session best score
 
 - Changed: Added session high-score tracking, a public `Restart()` path that

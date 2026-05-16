@@ -9,7 +9,7 @@ no graphics-library setup.
 
 - Classic Tetris movement
 - Score tracking
-- Session best score tracking
+- Persistent best score tracking
 - Line count and level progression
 - Line-clear feedback and combo counter
 - Hold-block swap
@@ -44,6 +44,7 @@ no graphics-library setup.
 - Consecutive line-clearing locks increase the combo counter
 - Level increases every 10 cleared lines
 - Automatic drop speed increases with level, capped at a minimum interval
+- Best score is saved to `tetris_highscore.txt` in the working directory
 
 ## Requirements
 
@@ -130,7 +131,7 @@ or Linux, and it helps catch logic regressions before touching rendering code.
 With a local C++ compiler:
 
 ```bash
-c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp src/sound.cpp -o /tmp/tetris_core_tests
+c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp src/position.cpp src/sound.cpp -o /tmp/tetris_core_tests
 /tmp/tetris_core_tests
 ```
 
@@ -156,6 +157,7 @@ src/
   main.cpp       Windows GUI, drawing, input, and game loop
   game.cpp       Game state, scoring, movement, rotation, beep sounds
   grid.cpp       Tetris board and row clearing
+  high_score.cpp Best-score file loading and saving
   block.cpp      Shared block behavior
   blocks.cpp     Individual Tetris block shapes
   sound.cpp      Small sound adapter; no-op outside Windows

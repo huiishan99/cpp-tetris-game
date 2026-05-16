@@ -1,4 +1,5 @@
 #include "game.h"
+#include "high_score.h"
 #include <windows.h>
 #include <string>
 #include <vector>
@@ -9,6 +10,7 @@ const int BOARD_LEFT = 32;
 const int BOARD_TOP = 64;
 const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
+const char *HIGH_SCORE_FILE = "tetris_highscore.txt";
 
 Game game;
 
@@ -427,6 +429,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int showCommand)
 {
+    game.SetHighScore(LoadHighScore(HIGH_SCORE_FILE));
+
     const char className[] = "HuiShanTetrisWindow";
 
     WNDCLASSA windowClass = {};
@@ -462,6 +466,8 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int showCommand)
         TranslateMessage(&message);
         DispatchMessage(&message);
     }
+
+    SaveHighScore(HIGH_SCORE_FILE, game.GetHighScore());
 
     return static_cast<int>(message.wParam);
 }

@@ -23,6 +23,7 @@ public:
     int GetHeldBlockId() const;
     int GetScore() const;
     int GetHighScore() const;
+    void SetHighScore(int value);
     int GetLinesCleared() const;
     int GetLastClearLines() const;
     int GetLastClearScore() const;
