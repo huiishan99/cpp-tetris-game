@@ -450,6 +450,12 @@ int Game::CalculateDropIntervalMs(int level)
 
 void Game::HandleInput(int key)
 {
+    if (key == 'r' || key == 'R')
+    {
+        Restart();
+        return;
+    }
+
     if (gameOver && key != 0)
     {
         Restart();
@@ -475,6 +481,7 @@ void Game::HandleInput(int key)
 
     if (paused)
     {
+        TogglePause();
         return;
     }
 

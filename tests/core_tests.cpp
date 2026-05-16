@@ -217,11 +217,29 @@ void TestPauseStopsAutomaticDrop()
     Expect(game.IsPaused(), "pause input toggles paused state on");
     Expect(HasSameCells(initialCells, game.GetCurrentBlockCells()), "paused game does not auto-drop");
 
-    game.HandleInput('p');
+    game.HandleInput(' ');
+
+    Expect(!game.IsPaused(), "any gameplay key resumes from pause");
+    Expect(HasSameCells(initialCells, game.GetCurrentBlockCells()), "resume key is consumed instead of moving immediately");
+
     game.MoveBlockDown();
 
-    Expect(!game.IsPaused(), "pause input toggles paused state off");
     Expect(!HasSameCells(initialCells, game.GetCurrentBlockCells()), "unpaused game resumes auto-drop");
+}
+
+void TestRestartInputResetsRunningGame()
+{
+    Game game;
+
+    game.Start();
+    game.HandleInput('s');
+    Expect(game.GetScore() == 1, "soft drop changes score before restart");
+
+    game.HandleInput('r');
+
+    Expect(game.IsStarted(), "restart input starts a fresh game immediately");
+    Expect(game.GetScore() == 0, "restart input clears current score");
+    Expect(game.GetLinesCleared() == 0, "restart input clears line count");
 }
 
 void TestGhostBlockPreviewIsBelowCurrentBlock()
@@ -424,6 +442,7 @@ int main()
     TestHighScoreSurvivesRestart();
     TestHighScoreFilePersistence();
     TestPauseStopsAutomaticDrop();
+    TestRestartInputResetsRunningGame();
     TestGhostBlockPreviewIsBelowCurrentBlock();
     TestNextBlockPreviewHasFourCells();
     TestUpcomingBlockQueueAdvances();

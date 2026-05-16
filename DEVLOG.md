@@ -26,6 +26,23 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Improve pause resume and restart controls
+
+- Changed: Pause now resumes on any key, paused Space is consumed instead of
+  hard-dropping immediately, `R` restarts the current game, the pause overlay
+  advertises any-key resume plus restart, and the line-clear flash was shortened
+  from 220ms to 170ms.
+- Why: Make pause easier to escape in a hurry, add an explicit restart action,
+  and make line clears feel a little snappier.
+- Risk: Any key on the pause screen now resumes play, while `Q` still quits and
+  `R` restarts; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Consider a pause menu later if restart confirmation or settings
+  are added.
+
 ### 2026-05-16 - Make pause easier to reach
 
 - Changed: Added `Esc` as a Win32 pause/resume key alongside `P`, updated the

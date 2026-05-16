@@ -12,7 +12,7 @@ const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
 const int FLASH_TIMER_ID = 2;
 const int LEVEL_TIMER_ID = 3;
-const int CLEAR_FLASH_DURATION_MS = 220;
+const int CLEAR_FLASH_DURATION_MS = 170;
 const int LEVEL_FLASH_DURATION_MS = 900;
 const char *HIGH_SCORE_FILE = "tetris_highscore.txt";
 const char *PIXEL_FONT_FILE = "Font\\monogram.ttf";
@@ -463,8 +463,8 @@ void DrawStateOverlay(HDC hdc)
     }
     else if (game.IsPaused())
     {
-        DrawOverlayPanel(hdc, "PAUSED", "P / ESC",
-                         "Score " + std::to_string(game.GetScore()),
+        DrawOverlayPanel(hdc, "PAUSED", "PRESS ANY KEY",
+                         "R restarts   Score " + std::to_string(game.GetScore()),
                          RGB(241, 194, 100));
     }
 }
@@ -512,7 +512,7 @@ void UpdateClearFlash(HWND hwnd)
         {
             clearFlashStartedAt = GetTickCount();
             KillTimer(hwnd, TIMER_ID);
-            SetTimer(hwnd, FLASH_TIMER_ID, 30, nullptr);
+            SetTimer(hwnd, FLASH_TIMER_ID, 24, nullptr);
         }
     }
 }
@@ -546,7 +546,7 @@ void DrawLineClearFlash(HDC hdc)
     }
 
     DWORD elapsed = GetTickCount() - clearFlashStartedAt;
-    COLORREF flashColor = ((elapsed / 55) % 2 == 0) ? RGB(249, 214, 124) : RGB(248, 244, 225);
+    COLORREF flashColor = ((elapsed / 42) % 2 == 0) ? RGB(249, 214, 124) : RGB(248, 244, 225);
 
     for (int row : game.GetLastClearedRows())
     {
@@ -667,10 +667,11 @@ void HandleGameKey(HWND hwnd, WPARAM key)
     case 'S':
     case 'W':
     case 'P':
+    case 'R':
         input = static_cast<int>(key);
         break;
     default:
-        input = (!game.IsStarted() || game.IsGameOver()) ? 'r' : 0;
+        input = (game.IsPaused() || !game.IsStarted() || game.IsGameOver()) ? 'p' : 0;
         break;
     }
 
