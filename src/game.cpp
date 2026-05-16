@@ -36,9 +36,23 @@ const int (&Game::GetGrid() const)[20][10]
     return grid.grid;
 }
 
-std::vector<Position> Game::GetCurrentBlockCells()
+std::vector<Position> Game::GetCurrentBlockCells() const
 {
     return currentBlock.GetCellPositions();
+}
+
+std::vector<Position> Game::GetGhostBlockCells() const
+{
+    Block ghostBlock = currentBlock;
+    while (true)
+    {
+        ghostBlock.Move(1, 0);
+        if (IsBlockOutside(ghostBlock) || BlockFits(ghostBlock) == false)
+        {
+            ghostBlock.Move(-1, 0);
+            return ghostBlock.GetCellPositions();
+        }
+    }
 }
 
 int Game::GetCurrentBlockId() const
@@ -167,9 +181,14 @@ void Game::DropBlock()
     }
 }
 
-bool Game::IsBlockOutside()
+bool Game::IsBlockOutside() const
 {
-    std::vector<Position> tiles = currentBlock.GetCellPositions();
+    return IsBlockOutside(currentBlock);
+}
+
+bool Game::IsBlockOutside(const Block &block) const
+{
+    std::vector<Position> tiles = block.GetCellPositions();
     for (Position item : tiles)
     {
         if (grid.IsCellOutside(item.row, item.column))
@@ -218,9 +237,14 @@ void Game::LockBlock()
     }
 }
 
-bool Game::BlockFits()
+bool Game::BlockFits() const
 {
-    std::vector<Position> tiles = currentBlock.GetCellPositions();
+    return BlockFits(currentBlock);
+}
+
+bool Game::BlockFits(const Block &block) const
+{
+    std::vector<Position> tiles = block.GetCellPositions();
     for (Position item : tiles)
     {
         if (grid.IsCellEmpty(item.row, item.column) == false)

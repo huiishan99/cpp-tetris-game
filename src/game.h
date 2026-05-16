@@ -11,7 +11,8 @@ public:
     void HandleInput(int key);
     void MoveBlockDown();
     const int (&GetGrid() const)[20][10];
-    std::vector<Position> GetCurrentBlockCells();
+    std::vector<Position> GetCurrentBlockCells() const;
+    std::vector<Position> GetGhostBlockCells() const;
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
     int GetScore() const;
@@ -24,10 +25,12 @@ private:
     void DropBlock();
     Block GetRandomBlock();
     std::vector<Block> GetAllBlocks();
-    bool IsBlockOutside();
+    bool IsBlockOutside() const;
+    bool IsBlockOutside(const Block &block) const;
     void RotateBlock();
     void LockBlock();
-    bool BlockFits();
+    bool BlockFits() const;
+    bool BlockFits(const Block &block) const;
     void Reset();
     void UpdateScore(int LinesCleared, int moveDownPoints);
     void TogglePause();

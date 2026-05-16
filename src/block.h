@@ -8,7 +8,7 @@ class Block
 public:
     Block();
     void Move(int row, int columns);
-    std::vector<Position> GetCellPositions();
+    std::vector<Position> GetCellPositions() const;
     void Rotate();
     void UndoRotation();
     int id;

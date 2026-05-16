@@ -86,6 +86,22 @@ void DrawCell(HDC hdc, int row, int column, int blockId)
     FillRectColor(hdc, left + 1, top + 1, left + CELL_SIZE - 1, top + CELL_SIZE - 1, GetBlockColor(blockId));
 }
 
+void DrawGhostCell(HDC hdc, int row, int column, int blockId)
+{
+    int left = BOARD_LEFT + column * CELL_SIZE;
+    int top = BOARD_TOP + row * CELL_SIZE;
+    COLORREF color = GetBlockColor(blockId);
+    HPEN pen = CreatePen(PS_SOLID, 2, color);
+    HGDIOBJ oldPen = SelectObject(hdc, pen);
+    HGDIOBJ oldBrush = SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
+
+    Rectangle(hdc, left + 5, top + 5, left + CELL_SIZE - 5, top + CELL_SIZE - 5);
+
+    SelectObject(hdc, oldBrush);
+    SelectObject(hdc, oldPen);
+    DeleteObject(pen);
+}
+
 void DrawGame(HDC hdc)
 {
     FillRectColor(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(44, 44, 127));
@@ -103,19 +119,27 @@ void DrawGame(HDC hdc)
         }
     }
 
-    for (Position item : game.GetCurrentBlockCells())
-    {
-        if (item.row >= 0 && item.row < 20 && item.column >= 0 && item.column < 10)
-        {
-            display[item.row][item.column] = game.GetCurrentBlockId();
-        }
-    }
-
     for (int row = 0; row < 20; row++)
     {
         for (int column = 0; column < 10; column++)
         {
             DrawCell(hdc, row, column, display[row][column]);
+        }
+    }
+
+    for (Position item : game.GetGhostBlockCells())
+    {
+        if (item.row >= 0 && item.row < 20 && item.column >= 0 && item.column < 10 && display[item.row][item.column] == 0)
+        {
+            DrawGhostCell(hdc, item.row, item.column, game.GetCurrentBlockId());
+        }
+    }
+
+    for (Position item : game.GetCurrentBlockCells())
+    {
+        if (item.row >= 0 && item.row < 20 && item.column >= 0 && item.column < 10)
+        {
+            DrawCell(hdc, item.row, item.column, game.GetCurrentBlockId());
         }
     }
 

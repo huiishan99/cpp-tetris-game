@@ -13,9 +13,9 @@ void Block::Move(int rows, int columns)
     columnOffset += columns;
 }
 
-std::vector<Position> Block::GetCellPositions()
+std::vector<Position> Block::GetCellPositions() const
 {
-    std::vector<Position> tiles = cells[rotationState];
+    std::vector<Position> tiles = cells.at(rotationState);
     std::vector<Position> movedTiles;
     for (Position item : tiles)
     {

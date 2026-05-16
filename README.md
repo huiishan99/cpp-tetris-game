@@ -10,6 +10,7 @@ no graphics-library setup.
 - Classic Tetris movement
 - Score tracking
 - Next-block preview
+- Ghost landing preview
 - Pause and resume
 - Soft drop and instant drop
 - Native Windows window rendering

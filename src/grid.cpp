@@ -19,7 +19,7 @@ void Grid::Initialize()
     }
 }
 
-void Grid::Print()
+void Grid::Print() const
 {
     for (int row = 0; row < numRows; row++)
     {
@@ -31,7 +31,7 @@ void Grid::Print()
     }
 }
 
-bool Grid::IsCellOutside(int row, int column)
+bool Grid::IsCellOutside(int row, int column) const
 {
     if (row >= 0 && row < numRows && column >= 0 && column < numCols)
     {
@@ -40,7 +40,7 @@ bool Grid::IsCellOutside(int row, int column)
     return true;
 }
 
-bool Grid::IsCellEmpty(int row, int column)
+bool Grid::IsCellEmpty(int row, int column) const
 {
     if (grid[row][column] == 0)
     {
@@ -67,7 +67,7 @@ int Grid::ClearFullRows()
     return completed;
 }
 
-bool Grid::IsRowFull(int row)
+bool Grid::IsRowFull(int row) const
 {
     for (int column = 0; column < numCols; column++)
     {

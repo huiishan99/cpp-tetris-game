@@ -26,6 +26,22 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add ghost landing preview
+
+- Changed: Added `Game::GetGhostBlockCells`, const-safe block/grid helpers,
+  ghost-cell outline rendering, and a core test that verifies ghost preview does
+  not move the current block.
+- Why: Make placement easier to read and improve the moment-to-moment feel of
+  the game.
+- Risk: Rendering order changed so the board is drawn before ghost/current
+  pieces; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune ghost styling on Windows and consider adding a setting to
+  hide/show ghost preview later.
+
 ### 2026-05-16 - Add pause and resume
 
 - Changed: Added paused game state, `P` input handling, paused UI text, accessors

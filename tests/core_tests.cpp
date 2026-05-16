@@ -37,6 +37,19 @@ bool HasSameCells(const std::vector<Position> &left, const std::vector<Position>
     return true;
 }
 
+int MinimumRow(const std::vector<Position> &cells)
+{
+    int minimum = cells.front().row;
+    for (const Position &cell : cells)
+    {
+        if (cell.row < minimum)
+        {
+            minimum = cell.row;
+        }
+    }
+    return minimum;
+}
+
 void Expect(bool condition, const char *message)
 {
     if (!condition)
@@ -124,6 +137,17 @@ void TestPauseStopsAutomaticDrop()
     Expect(!game.IsPaused(), "pause input toggles paused state off");
     Expect(!HasSameCells(initialCells, game.GetCurrentBlockCells()), "unpaused game resumes auto-drop");
 }
+
+void TestGhostBlockPreviewIsBelowCurrentBlock()
+{
+    Game game;
+    std::vector<Position> currentCells = game.GetCurrentBlockCells();
+    std::vector<Position> ghostCells = game.GetGhostBlockCells();
+
+    Expect(ghostCells.size() == currentCells.size(), "ghost block keeps the same number of cells");
+    Expect(MinimumRow(ghostCells) > MinimumRow(currentCells), "ghost block lands below the current block");
+    Expect(HasSameCells(currentCells, game.GetCurrentBlockCells()), "ghost preview does not move the current block");
+}
 }
 
 int main()
@@ -133,6 +157,7 @@ int main()
     TestBlockRotationCycles();
     TestSoftDropScoresOnePoint();
     TestPauseStopsAutomaticDrop();
+    TestGhostBlockPreviewIsBelowCurrentBlock();
 
     std::cout << "All core tests passed." << std::endl;
     return 0;
