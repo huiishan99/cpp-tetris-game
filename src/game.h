@@ -32,6 +32,7 @@ public:
     int GetLinesCleared() const;
     int GetLastClearLines() const;
     int GetLastClearScore() const;
+    bool WasLastClearTSpin() const;
     const std::vector<int> &GetLastClearedRows() const;
     int GetClearEventId() const;
     int GetCombo() const;
@@ -46,6 +47,7 @@ public:
     bool HasHeldBlock() const;
     bool CanHold() const;
     static int CalculateLineClearScore(int completedLines);
+    static int CalculateTSpinScore(int completedLines);
     static int CalculateLevel(int completedLines);
     static int CalculateDropIntervalMs(int level);
 
@@ -61,6 +63,7 @@ private:
     bool IsBlockOutside(const Block &block) const;
     void RotateBlock();
     bool TryWallKick();
+    bool IsCurrentTSpin() const;
     void LockBlock();
     void StartLineClear(const std::vector<int> &fullRows);
     void SpawnNextBlock();
@@ -69,7 +72,7 @@ private:
     bool BlockFits() const;
     bool BlockFits(const Block &block) const;
     void Reset();
-    void UpdateScore(int LinesCleared, int moveDownPoints);
+    void UpdateScore(int LinesCleared, int moveDownPoints, bool tSpin = false);
     void UpdateHighScore();
     void TogglePause();
     Grid grid;
@@ -85,6 +88,8 @@ private:
     bool lineClearPending;
     bool hasHeldBlock;
     bool holdUsed;
+    bool lastSuccessfulActionWasRotate;
+    bool lastClearWasTSpin;
     int score;
     int highScore;
     int linesCleared;

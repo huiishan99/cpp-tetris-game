@@ -26,6 +26,24 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add T-spin feedback and pixel font
+
+- Changed: Added T-spin single/double/triple bonus scoring, corner-based T-spin
+  detection after successful rotation, T-spin status-panel feedback, a faster
+  line-clear flash timing, and private loading of `Font/monogram.ttf` for a
+  more stylized pixel UI.
+- Why: Support a standard advanced Tetris technique, make clears feel snappier,
+  and give the window more visual character than the default system font.
+- Risk: T-spin detection uses a lightweight three-corner rule with the existing
+  simple kick table, not full guideline SRS; Win32 font rendering and animation
+  timing still need a Windows play pass.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add full SRS and optional custom L/J/S/Z spin recognition if the
+  project should support non-standard spin bonuses.
+
 ### 2026-05-16 - Add level-up feedback
 
 - Changed: Added level-up event tracking, reached-level state, a level-up sound

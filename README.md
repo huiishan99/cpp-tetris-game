@@ -14,14 +14,15 @@ no graphics-library setup.
 - Line count and level progression
 - Level-up status feedback
 - Line-clear feedback and combo counter
-- Delayed line-clear flash animation
+- Faster delayed line-clear flash animation
+- T-spin clear detection and bonus scoring
 - Hold-block swap
 - Three-block next queue preview
 - Ghost landing preview
 - Rotation kick assist near walls and the spawn top
 - Pause and resume
 - Soft drop and instant drop
-- Polished dark UI with block preview and status panels
+- Polished dark pixel-style UI with block preview and status panels
 - Native Windows window rendering
 - Small Windows beep sounds for movement, drops, hold, rotate, row clear,
   pause, and game over
@@ -46,6 +47,7 @@ no graphics-library setup.
 - Soft drop: 1 point per successful row
 - Hard drop: 2 points per row
 - Line clear scoring: 100 / 300 / 500 / 800 points
+- T-spin clear scoring: 800 / 1200 / 1600 points
 - Consecutive line-clearing locks increase the combo counter
 - Level increases every 10 cleared lines
 - Automatic drop speed increases with level, capped at a minimum interval

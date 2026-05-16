@@ -12,15 +12,43 @@ const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
 const int FLASH_TIMER_ID = 2;
 const int LEVEL_TIMER_ID = 3;
-const int CLEAR_FLASH_DURATION_MS = 320;
+const int CLEAR_FLASH_DURATION_MS = 220;
 const int LEVEL_FLASH_DURATION_MS = 900;
 const char *HIGH_SCORE_FILE = "tetris_highscore.txt";
+const char *PIXEL_FONT_FILE = "Font\\monogram.ttf";
+const char *PIXEL_FONT_NAME = "monogram";
+const char *FALLBACK_FONT_NAME = "Segoe UI";
 
 Game game;
 int observedClearEventId = 0;
 int observedLevelUpEventId = 0;
 DWORD clearFlashStartedAt = 0;
 DWORD levelFlashStartedAt = 0;
+bool pixelFontLoaded = false;
+
+const char *GetGameFontName()
+{
+    return pixelFontLoaded ? PIXEL_FONT_NAME : FALLBACK_FONT_NAME;
+}
+
+DWORD GetGameFontQuality()
+{
+    return pixelFontLoaded ? NONANTIALIASED_QUALITY : CLEARTYPE_NATURAL_QUALITY;
+}
+
+void LoadGameFont()
+{
+    pixelFontLoaded = AddFontResourceExA(PIXEL_FONT_FILE, FR_PRIVATE, nullptr) > 0;
+}
+
+void UnloadGameFont()
+{
+    if (pixelFontLoaded)
+    {
+        RemoveFontResourceExA(PIXEL_FONT_FILE, FR_PRIVATE, nullptr);
+        pixelFontLoaded = false;
+    }
+}
 
 COLORREF GetBlockColor(int blockId)
 {
@@ -83,7 +111,7 @@ void DrawTextLine(HDC hdc, int x, int y, const std::string &text, int size = 24,
 {
     HFONT font = CreateFontA(size, 0, 0, 0, weight, FALSE, FALSE, FALSE,
                              ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Segoe UI");
+                             GetGameFontQuality(), DEFAULT_PITCH | FF_DONTCARE, GetGameFontName());
     HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, color);
@@ -97,7 +125,7 @@ void DrawTextCentered(HDC hdc, int left, int right, int y, const std::string &te
 {
     HFONT font = CreateFontA(size, 0, 0, 0, weight, FALSE, FALSE, FALSE,
                              ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Segoe UI");
+                             GetGameFontQuality(), DEFAULT_PITCH | FF_DONTCARE, GetGameFontName());
     HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, color);
@@ -385,11 +413,14 @@ void DrawStatusPanel(HDC hdc, int x, int y, int width)
     }
     else if (game.GetLastClearLines() > 0 && game.IsStarted() && !game.IsGameOver() && !game.IsPaused())
     {
-        std::string clearText = GetClearLabel(game.GetLastClearLines());
+        std::string clearText = game.WasLastClearTSpin() ? "T-SPIN" : GetClearLabel(game.GetLastClearLines());
         std::string scoreText = "+" + std::to_string(game.GetLastClearScore());
         DrawTextLine(hdc, x + 14, y + 30, clearText, 22, RGB(249, 214, 124), FW_BOLD);
         DrawTextLine(hdc, x + 104, y + 33, scoreText, 18, RGB(248, 244, 225), FW_BOLD);
-        DrawTextLine(hdc, x + 14, y + 56, "Combo x" + std::to_string(game.GetCombo()), 16, RGB(170, 178, 158), FW_NORMAL);
+        std::string detailText = game.WasLastClearTSpin()
+                                     ? GetClearLabel(game.GetLastClearLines()) + "   Combo x" + std::to_string(game.GetCombo())
+                                     : "Combo x" + std::to_string(game.GetCombo());
+        DrawTextLine(hdc, x + 14, y + 56, detailText, 16, RGB(170, 178, 158), FW_NORMAL);
     }
     else
     {
@@ -481,7 +512,7 @@ void UpdateClearFlash(HWND hwnd)
         {
             clearFlashStartedAt = GetTickCount();
             KillTimer(hwnd, TIMER_ID);
-            SetTimer(hwnd, FLASH_TIMER_ID, 45, nullptr);
+            SetTimer(hwnd, FLASH_TIMER_ID, 30, nullptr);
         }
     }
 }
@@ -515,7 +546,7 @@ void DrawLineClearFlash(HDC hdc)
     }
 
     DWORD elapsed = GetTickCount() - clearFlashStartedAt;
-    COLORREF flashColor = ((elapsed / 80) % 2 == 0) ? RGB(249, 214, 124) : RGB(248, 244, 225);
+    COLORREF flashColor = ((elapsed / 55) % 2 == 0) ? RGB(249, 214, 124) : RGB(248, 244, 225);
 
     for (int row : game.GetLastClearedRows())
     {
@@ -723,6 +754,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int showCommand)
 {
+    LoadGameFont();
     game.SetHighScore(LoadHighScore(HIGH_SCORE_FILE));
 
     const char className[] = "HuiShanTetrisWindow";
@@ -748,6 +780,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int showCommand)
 
     if (hwnd == nullptr)
     {
+        UnloadGameFont();
         return 0;
     }
 
@@ -762,6 +795,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int showCommand)
     }
 
     SaveHighScore(HIGH_SCORE_FILE, game.GetHighScore());
+    UnloadGameFont();
 
     return static_cast<int>(message.wParam);
 }

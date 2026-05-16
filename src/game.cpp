@@ -20,6 +20,50 @@ const Position WallKickOffsets[] = {
     Position(1, 1),
     Position(-1, 0),
 };
+
+bool HasNeighborCell(const std::vector<Position> &cells, int row, int column)
+{
+    for (const Position &cell : cells)
+    {
+        if (cell.row == row && cell.column == column)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FindTSpinCenter(const std::vector<Position> &cells, int &centerRow, int &centerColumn)
+{
+    for (const Position &cell : cells)
+    {
+        int neighbors = 0;
+        if (HasNeighborCell(cells, cell.row - 1, cell.column))
+        {
+            neighbors++;
+        }
+        if (HasNeighborCell(cells, cell.row + 1, cell.column))
+        {
+            neighbors++;
+        }
+        if (HasNeighborCell(cells, cell.row, cell.column - 1))
+        {
+            neighbors++;
+        }
+        if (HasNeighborCell(cells, cell.row, cell.column + 1))
+        {
+            neighbors++;
+        }
+
+        if (neighbors == 3)
+        {
+            centerRow = cell.row;
+            centerColumn = cell.column;
+            return true;
+        }
+    }
+    return false;
+}
 }
 
 Game::Game()
@@ -37,6 +81,8 @@ Game::Game()
     lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
+    lastClearWasTSpin = false;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -62,6 +108,8 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
+    lastClearWasTSpin = false;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -87,6 +135,8 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
+    lastClearWasTSpin = false;
     score = 0;
     highScore = 0;
     linesCleared = 0;
@@ -117,6 +167,8 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
+    lastClearWasTSpin = false;
     score = 0;
     highScore = 0;
     linesCleared = initialLinesCleared;
@@ -268,6 +320,11 @@ int Game::GetLastClearScore() const
     return lastClearScore;
 }
 
+bool Game::WasLastClearTSpin() const
+{
+    return lastClearWasTSpin;
+}
+
 const std::vector<int> &Game::GetLastClearedRows() const
 {
     return lastClearedRows;
@@ -345,6 +402,23 @@ int Game::CalculateLineClearScore(int completedLines)
         return 500;
     case 4:
         return 800;
+    default:
+        return 0;
+    }
+}
+
+int Game::CalculateTSpinScore(int completedLines)
+{
+    switch (completedLines)
+    {
+    case 0:
+        return 400;
+    case 1:
+        return 800;
+    case 2:
+        return 1200;
+    case 3:
+        return 1600;
     default:
         return 0;
     }
@@ -462,6 +536,7 @@ void Game::MoveBlockLeft()
         }
         else
         {
+            lastSuccessfulActionWasRotate = false;
             PlayMoveSound();
         }
     }
@@ -478,6 +553,7 @@ void Game::MoveBlockRight()
         }
         else
         {
+            lastSuccessfulActionWasRotate = false;
             PlayMoveSound();
         }
     }
@@ -545,6 +621,7 @@ void Game::HoldBlock()
     }
 
     holdUsed = true;
+    lastSuccessfulActionWasRotate = false;
     if (BlockFits() == false)
     {
         gameOver = true;
@@ -584,6 +661,7 @@ void Game::RotateBlock()
         }
         else
         {
+            lastSuccessfulActionWasRotate = true;
             PlayRotateSound();
         }
     }
@@ -603,18 +681,54 @@ bool Game::TryWallKick()
     return false;
 }
 
+bool Game::IsCurrentTSpin() const
+{
+    if (currentBlock.id != 6 || !lastSuccessfulActionWasRotate)
+    {
+        return false;
+    }
+
+    std::vector<Position> tiles = currentBlock.GetCellPositions();
+    int centerRow = 0;
+    int centerColumn = 0;
+    if (!FindTSpinCenter(tiles, centerRow, centerColumn))
+    {
+        return false;
+    }
+
+    const Position corners[] = {
+        Position(centerRow - 1, centerColumn - 1),
+        Position(centerRow - 1, centerColumn + 1),
+        Position(centerRow + 1, centerColumn - 1),
+        Position(centerRow + 1, centerColumn + 1),
+    };
+
+    int blockedCorners = 0;
+    for (Position corner : corners)
+    {
+        if (grid.IsCellOutside(corner.row, corner.column) || !grid.IsCellEmpty(corner.row, corner.column))
+        {
+            blockedCorners++;
+        }
+    }
+    return blockedCorners >= 3;
+}
+
 void Game::LockBlock()
 {
+    bool tSpin = IsCurrentTSpin();
     std::vector<Position> tiles = currentBlock.GetCellPositions();
     for (Position item : tiles)
     {
         grid.grid[item.row][item.column] = currentBlock.id;
     }
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
 
     std::vector<int> fullRows = grid.GetFullRows();
     if (!fullRows.empty())
     {
+        lastClearWasTSpin = tSpin;
         StartLineClear(fullRows);
         return;
     }
@@ -622,6 +736,7 @@ void Game::LockBlock()
     combo = 0;
     lastClearLines = 0;
     lastClearScore = 0;
+    lastClearWasTSpin = false;
     lastClearedRows.clear();
     SpawnNextBlock();
 }
@@ -632,11 +747,11 @@ void Game::StartLineClear(const std::vector<int> &fullRows)
     lineClearPending = true;
     combo++;
     lastClearLines = rowsCleared;
-    lastClearScore = CalculateLineClearScore(rowsCleared);
+    lastClearScore = lastClearWasTSpin ? CalculateTSpinScore(rowsCleared) : CalculateLineClearScore(rowsCleared);
     lastClearedRows = fullRows;
     clearEventId++;
     PlayLineClearSound();
-    UpdateScore(rowsCleared, 0);
+    UpdateScore(rowsCleared, 0, lastClearWasTSpin);
 }
 
 void Game::FinishLineClear()
@@ -748,6 +863,8 @@ void Game::Reset()
     lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
+    lastSuccessfulActionWasRotate = false;
+    lastClearWasTSpin = false;
     score = 0;
     linesCleared = 0;
     lastClearLines = 0;
@@ -759,10 +876,10 @@ void Game::Reset()
     lastLevelReached = 1;
 }
 
-void Game::UpdateScore(int linesCompleted, int moveDownPoints)
+void Game::UpdateScore(int linesCompleted, int moveDownPoints, bool tSpin)
 {
     int previousLevel = GetLevel();
-    score += CalculateLineClearScore(linesCompleted);
+    score += tSpin ? CalculateTSpinScore(linesCompleted) : CalculateLineClearScore(linesCompleted);
     linesCleared += linesCompleted;
     score += moveDownPoints;
     int currentLevel = GetLevel();
