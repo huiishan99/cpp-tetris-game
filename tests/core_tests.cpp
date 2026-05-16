@@ -280,12 +280,39 @@ void TestLineClearFeedbackAndComboReset()
     int startingClearEvent = game.GetClearEventId();
     game.HandleInput(' ');
 
+    const int (&pendingGrid)[20][10] = game.GetGrid();
+    bool pendingRowStillFilled = true;
+    for (int column = 0; column < 10; column++)
+    {
+        if (pendingGrid[19][column] == 0)
+        {
+            pendingRowStillFilled = false;
+        }
+    }
+
+    Expect(game.IsLineClearPending(), "line clear waits for animation before collapsing rows");
+    Expect(pendingRowStillFilled, "line clear keeps the completed row visible during animation");
     Expect(game.GetLastClearLines() == 1, "line clear feedback stores cleared line count");
     Expect(game.GetLastClearScore() == 100, "line clear feedback stores clear score");
     Expect(game.GetLastClearedRows().size() == 1 && game.GetLastClearedRows()[0] == 19, "line clear feedback stores cleared row index");
     Expect(game.GetClearEventId() == startingClearEvent + 1, "line clear increments clear event id");
     Expect(game.GetCombo() == 1, "first clear starts combo at one");
     Expect(game.GetLinesCleared() == 1, "game tracks total cleared lines after lock");
+
+    game.FinishLineClear();
+
+    const int (&clearedGrid)[20][10] = game.GetGrid();
+    bool clearedRowIsEmpty = true;
+    for (int column = 0; column < 10; column++)
+    {
+        if (clearedGrid[19][column] != 0)
+        {
+            clearedRowIsEmpty = false;
+        }
+    }
+
+    Expect(!game.IsLineClearPending(), "finishing line clear resumes normal play");
+    Expect(clearedRowIsEmpty, "finishing line clear collapses the completed row");
 
     game.HandleInput(' ');
 

@@ -347,7 +347,7 @@ void DrawStateOverlay(HDC hdc)
 
 bool IsClearFlashActive()
 {
-    if (observedClearEventId == 0 || game.GetLastClearedRows().empty())
+    if (!game.IsLineClearPending() || observedClearEventId == 0 || game.GetLastClearedRows().empty())
     {
         return false;
     }
@@ -356,18 +356,37 @@ bool IsClearFlashActive()
     return elapsed < static_cast<DWORD>(CLEAR_FLASH_DURATION_MS);
 }
 
+bool IsClearFlashReadyToFinish()
+{
+    if (!game.IsLineClearPending() || observedClearEventId == 0)
+    {
+        return false;
+    }
+
+    DWORD elapsed = GetTickCount() - clearFlashStartedAt;
+    return elapsed >= static_cast<DWORD>(CLEAR_FLASH_DURATION_MS);
+}
+
 void UpdateClearFlash(HWND hwnd)
 {
     int clearEventId = game.GetClearEventId();
     if (clearEventId != observedClearEventId)
     {
         observedClearEventId = clearEventId;
-        if (clearEventId > 0)
+        if (clearEventId > 0 && game.IsLineClearPending())
         {
             clearFlashStartedAt = GetTickCount();
+            KillTimer(hwnd, TIMER_ID);
             SetTimer(hwnd, FLASH_TIMER_ID, 45, nullptr);
         }
     }
+}
+
+void FinishClearFlash(HWND hwnd)
+{
+    game.FinishLineClear();
+    KillTimer(hwnd, FLASH_TIMER_ID);
+    SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
 }
 
 void DrawLineClearFlash(HDC hdc)
@@ -521,7 +540,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_TIMER:
         if (wParam == FLASH_TIMER_ID)
         {
-            if (!IsClearFlashActive())
+            if (IsClearFlashReadyToFinish())
+            {
+                FinishClearFlash(hwnd);
+            }
+            else if (!game.IsLineClearPending())
             {
                 KillTimer(hwnd, FLASH_TIMER_ID);
             }
@@ -531,7 +554,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 
         game.MoveBlockDown();
         UpdateClearFlash(hwnd);
-        SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
+        if (!game.IsLineClearPending())
+        {
+            SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
+        }
         InvalidateRect(hwnd, nullptr, FALSE);
         return 0;
     case WM_KEYDOWN:

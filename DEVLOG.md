@@ -26,6 +26,23 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Delay row collapse during line clear
+
+- Changed: Added a `lineClearPending` state, delayed row collapse through
+  `Game::FinishLineClear`, paused the Win32 drop timer while rows flash, and
+  expanded core tests to verify completed rows stay visible until the animation
+  finishes.
+- Why: Make line clears feel more intentional and readable, with the board
+  showing the completed rows before they collapse.
+- Risk: Input is ignored during the short clear delay, and the Win32 GUI build
+  was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune the clear delay duration on Windows if it feels too snappy
+  or too slow during real play.
+
 ### 2026-05-16 - Add line clear flash
 
 - Changed: Added `Grid::GetFullRows`, tracked the last cleared row indices and

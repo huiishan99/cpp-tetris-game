@@ -31,6 +31,7 @@ Game::Game()
     gameOver = false;
     started = false;
     paused = false;
+    lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
@@ -52,6 +53,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock)
     gameOver = false;
     started = false;
     paused = false;
+    lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
@@ -73,6 +75,7 @@ Game::Game(const Block &startingBlock, const Block &upcomingBlock, const Grid &i
     gameOver = false;
     started = false;
     paused = false;
+    lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;
@@ -109,11 +112,20 @@ const int (&Game::GetGrid() const)[20][10]
 
 std::vector<Position> Game::GetCurrentBlockCells() const
 {
+    if (lineClearPending)
+    {
+        return {};
+    }
     return currentBlock.GetCellPositions();
 }
 
 std::vector<Position> Game::GetGhostBlockCells() const
 {
+    if (lineClearPending)
+    {
+        return {};
+    }
+
     Block ghostBlock = currentBlock;
     while (true)
     {
@@ -233,6 +245,11 @@ bool Game::IsPaused() const
     return paused;
 }
 
+bool Game::IsLineClearPending() const
+{
+    return lineClearPending;
+}
+
 bool Game::HasHeldBlock() const
 {
     return hasHeldBlock;
@@ -240,7 +257,7 @@ bool Game::HasHeldBlock() const
 
 bool Game::CanHold() const
 {
-    return started && !gameOver && !paused && !holdUsed;
+    return started && !gameOver && !paused && !lineClearPending && !holdUsed;
 }
 
 int Game::CalculateLineClearScore(int completedLines)
@@ -295,6 +312,11 @@ void Game::HandleInput(int key)
     if (!started && key != 0)
     {
         Start();
+        return;
+    }
+
+    if (lineClearPending)
+    {
         return;
     }
 
@@ -357,7 +379,7 @@ void Game::Restart()
 
 void Game::MoveBlockLeft()
 {
-    if (started && !gameOver && !paused)
+    if (started && !gameOver && !paused && !lineClearPending)
     {
         currentBlock.Move(0, -1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -369,7 +391,7 @@ void Game::MoveBlockLeft()
 
 void Game::MoveBlockRight()
 {
-    if (started && !gameOver && !paused)
+    if (started && !gameOver && !paused && !lineClearPending)
     {
         currentBlock.Move(0, 1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -381,7 +403,7 @@ void Game::MoveBlockRight()
 
 bool Game::MoveBlockDown()
 {
-    if (started && !gameOver && !paused)
+    if (started && !gameOver && !paused && !lineClearPending)
     {
         currentBlock.Move(1, 0);
         if (IsBlockOutside() || BlockFits() == false)
@@ -397,7 +419,7 @@ bool Game::MoveBlockDown()
 
 void Game::DropBlock()
 {
-    if (started && !gameOver && !paused)
+    if (started && !gameOver && !paused && !lineClearPending)
     {
         int rowsDropped = 0;
         while (true)
@@ -465,7 +487,7 @@ bool Game::IsBlockOutside(const Block &block) const
 
 void Game::RotateBlock()
 {
-    if (started && !gameOver && !paused)
+    if (started && !gameOver && !paused && !lineClearPending)
     {
         currentBlock.Rotate();
         if (!TryWallKick())
@@ -500,8 +522,50 @@ void Game::LockBlock()
     {
         grid.grid[item.row][item.column] = currentBlock.id;
     }
-    currentBlock = nextBlock;
     holdUsed = false;
+
+    std::vector<int> fullRows = grid.GetFullRows();
+    if (!fullRows.empty())
+    {
+        StartLineClear(fullRows);
+        return;
+    }
+
+    combo = 0;
+    lastClearLines = 0;
+    lastClearScore = 0;
+    lastClearedRows.clear();
+    SpawnNextBlock();
+}
+
+void Game::StartLineClear(const std::vector<int> &fullRows)
+{
+    int rowsCleared = static_cast<int>(fullRows.size());
+    lineClearPending = true;
+    combo++;
+    lastClearLines = rowsCleared;
+    lastClearScore = CalculateLineClearScore(rowsCleared);
+    lastClearedRows = fullRows;
+    clearEventId++;
+    PlayLineClearSound();
+    UpdateScore(rowsCleared, 0);
+}
+
+void Game::FinishLineClear()
+{
+    if (!lineClearPending)
+    {
+        return;
+    }
+
+    grid.ClearFullRows();
+    lineClearPending = false;
+    SpawnNextBlock();
+}
+
+void Game::SpawnNextBlock()
+{
+    currentBlock = nextBlock;
     if (BlockFits() == false)
     {
         gameOver = true;
@@ -509,25 +573,6 @@ void Game::LockBlock()
         paused = false;
     }
     nextBlock = GetRandomBlock();
-    std::vector<int> fullRows = grid.GetFullRows();
-    int rowsCleared = grid.ClearFullRows();
-    if (rowsCleared > 0)
-    {
-        combo++;
-        lastClearLines = rowsCleared;
-        lastClearScore = CalculateLineClearScore(rowsCleared);
-        lastClearedRows = fullRows;
-        clearEventId++;
-        PlayLineClearSound();
-        UpdateScore(rowsCleared, 0);
-    }
-    else
-    {
-        combo = 0;
-        lastClearLines = 0;
-        lastClearScore = 0;
-        lastClearedRows.clear();
-    }
 }
 
 bool Game::BlockFits() const
@@ -580,6 +625,7 @@ void Game::Reset()
     gameOver = false;
     started = false;
     paused = false;
+    lineClearPending = false;
     hasHeldBlock = false;
     holdUsed = false;
     score = 0;

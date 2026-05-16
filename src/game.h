@@ -14,6 +14,7 @@ public:
     void Start();
     void Restart();
     bool MoveBlockDown();
+    void FinishLineClear();
     const int (&GetGrid() const)[20][10];
     std::vector<Position> GetCurrentBlockCells() const;
     std::vector<Position> GetGhostBlockCells() const;
@@ -36,6 +37,7 @@ public:
     bool IsStarted() const;
     bool IsGameOver() const;
     bool IsPaused() const;
+    bool IsLineClearPending() const;
     bool HasHeldBlock() const;
     bool CanHold() const;
     static int CalculateLineClearScore(int completedLines);
@@ -55,6 +57,8 @@ private:
     void RotateBlock();
     bool TryWallKick();
     void LockBlock();
+    void StartLineClear(const std::vector<int> &fullRows);
+    void SpawnNextBlock();
     bool BlockFits() const;
     bool BlockFits(const Block &block) const;
     void Reset();
@@ -70,6 +74,7 @@ private:
     bool gameOver;
     bool started;
     bool paused;
+    bool lineClearPending;
     bool hasHeldBlock;
     bool holdUsed;
     int score;
