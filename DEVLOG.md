@@ -26,6 +26,20 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add line stats and level speed
+
+- Changed: Added total cleared lines, level calculation, dynamic drop interval,
+  side-panel stats for lines/level, and core tests for level/speed formulas.
+- Why: Make the game pace evolve over time instead of staying at one fixed
+  speed.
+- Risk: Timer interval now changes after each tick; Win32 GUI build was not
+  available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Tune the speed curve after testing the Windows build by hand.
+
 ### 2026-05-16 - Add ghost landing preview
 
 - Changed: Added `Game::GetGhostBlockCells`, const-safe block/grid helpers,

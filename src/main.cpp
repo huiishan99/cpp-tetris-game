@@ -8,7 +8,6 @@ const int BOARD_LEFT = 28;
 const int BOARD_TOP = 28;
 const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
-const int DROP_INTERVAL_MS = 350;
 
 Game game;
 
@@ -147,25 +146,29 @@ void DrawGame(HDC hdc)
     DrawTextLine(hdc, panelX, 34, "TETRIS", 36);
     DrawTextLine(hdc, panelX, 96, "Score", 24);
     DrawTextLine(hdc, panelX, 128, std::to_string(game.GetScore()), 32);
-    DrawTextLine(hdc, panelX, 204, "Next", 24);
-    DrawTextLine(hdc, panelX, 236, GetBlockName(game.GetNextBlockId()), 42);
+    DrawTextLine(hdc, panelX, 190, "Lines", 22);
+    DrawTextLine(hdc, panelX, 220, std::to_string(game.GetLinesCleared()), 28);
+    DrawTextLine(hdc, panelX + 72, 190, "Level", 22);
+    DrawTextLine(hdc, panelX + 72, 220, std::to_string(game.GetLevel()), 28);
+    DrawTextLine(hdc, panelX, 286, "Next", 24);
+    DrawTextLine(hdc, panelX, 318, GetBlockName(game.GetNextBlockId()), 42);
 
-    DrawTextLine(hdc, panelX, 340, "Keys", 22);
-    DrawTextLine(hdc, panelX, 374, "Arrows/WASD", 18);
-    DrawTextLine(hdc, panelX, 402, "Space: drop", 18);
-    DrawTextLine(hdc, panelX, 430, "P: pause", 18);
-    DrawTextLine(hdc, panelX, 458, "Q: quit", 18);
+    DrawTextLine(hdc, panelX, 420, "Keys", 22);
+    DrawTextLine(hdc, panelX, 454, "Arrows/WASD", 18);
+    DrawTextLine(hdc, panelX, 482, "Space: drop", 18);
+    DrawTextLine(hdc, panelX, 510, "P: pause", 18);
+    DrawTextLine(hdc, panelX, 538, "Q: quit", 18);
 
     if (game.IsPaused())
     {
-        DrawTextLine(hdc, panelX, 520, "PAUSED", 28);
-        DrawTextLine(hdc, panelX, 558, "Press P", 18);
+        DrawTextLine(hdc, panelX, 590, "PAUSED", 28);
+        DrawTextLine(hdc, panelX, 628, "Press P", 18);
     }
 
     if (game.IsGameOver())
     {
-        DrawTextLine(hdc, panelX, 520, "GAME OVER", 28);
-        DrawTextLine(hdc, panelX, 558, "Press any key", 18);
+        DrawTextLine(hdc, panelX, 590, "GAME OVER", 28);
+        DrawTextLine(hdc, panelX, 628, "Press any key", 18);
     }
 }
 
@@ -219,10 +222,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     switch (message)
     {
     case WM_CREATE:
-        SetTimer(hwnd, TIMER_ID, DROP_INTERVAL_MS, nullptr);
+        SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
         return 0;
     case WM_TIMER:
         game.MoveBlockDown();
+        SetTimer(hwnd, TIMER_ID, game.GetDropIntervalMs(), nullptr);
         InvalidateRect(hwnd, nullptr, FALSE);
         return 0;
     case WM_KEYDOWN:

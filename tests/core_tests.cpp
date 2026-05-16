@@ -148,6 +148,16 @@ void TestGhostBlockPreviewIsBelowCurrentBlock()
     Expect(MinimumRow(ghostCells) > MinimumRow(currentCells), "ghost block lands below the current block");
     Expect(HasSameCells(currentCells, game.GetCurrentBlockCells()), "ghost preview does not move the current block");
 }
+
+void TestLevelAndDropSpeedProgression()
+{
+    Expect(Game::CalculateLevel(0) == 1, "level starts at one");
+    Expect(Game::CalculateLevel(9) == 1, "level stays one before ten lines");
+    Expect(Game::CalculateLevel(10) == 2, "level increases every ten lines");
+    Expect(Game::CalculateDropIntervalMs(1) == 350, "level one uses the base drop interval");
+    Expect(Game::CalculateDropIntervalMs(3) == 300, "drop interval gets faster as level rises");
+    Expect(Game::CalculateDropIntervalMs(99) == 100, "drop interval has a minimum speed cap");
+}
 }
 
 int main()
@@ -158,6 +168,7 @@ int main()
     TestSoftDropScoresOnePoint();
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
+    TestLevelAndDropSpeedProgression();
 
     std::cout << "All core tests passed." << std::endl;
     return 0;

@@ -16,8 +16,13 @@ public:
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
     int GetScore() const;
+    int GetLinesCleared() const;
+    int GetLevel() const;
+    int GetDropIntervalMs() const;
     bool IsGameOver() const;
     bool IsPaused() const;
+    static int CalculateLevel(int completedLines);
+    static int CalculateDropIntervalMs(int level);
 
 private:
     void MoveBlockLeft();
@@ -42,4 +47,5 @@ private:
     bool gameOver;
     bool paused;
     int score;
+    int linesCleared;
 };

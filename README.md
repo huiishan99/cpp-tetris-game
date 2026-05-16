@@ -9,6 +9,7 @@ no graphics-library setup.
 
 - Classic Tetris movement
 - Score tracking
+- Line count and level progression
 - Next-block preview
 - Ghost landing preview
 - Pause and resume
@@ -28,6 +29,14 @@ no graphics-library setup.
 | P | Pause or resume |
 | Any key after game over | Restart |
 | Q | Quit |
+
+## Scoring and Pace
+
+- Soft drop: 1 point per row
+- Hard drop: 2 points per row
+- Line clear scoring: 100 / 300 / 500 / 800 points
+- Level increases every 10 cleared lines
+- Automatic drop speed increases with level, capped at a minimum interval
 
 ## Requirements
 

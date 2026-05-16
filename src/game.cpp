@@ -1,6 +1,14 @@
 #include "game.h"
 #include "sound.h"
 
+namespace
+{
+const int LinesPerLevel = 10;
+const int BaseDropIntervalMs = 350;
+const int DropIntervalStepMs = 25;
+const int MinimumDropIntervalMs = 100;
+}
+
 Game::Game()
 {
     grid = Grid();
@@ -11,6 +19,7 @@ Game::Game()
     gameOver = false;
     paused = false;
     score = 0;
+    linesCleared = 0;
 }
 
 Block Game::GetRandomBlock()
@@ -70,6 +79,21 @@ int Game::GetScore() const
     return score;
 }
 
+int Game::GetLinesCleared() const
+{
+    return linesCleared;
+}
+
+int Game::GetLevel() const
+{
+    return CalculateLevel(linesCleared);
+}
+
+int Game::GetDropIntervalMs() const
+{
+    return CalculateDropIntervalMs(GetLevel());
+}
+
 bool Game::IsGameOver() const
 {
     return gameOver;
@@ -78,6 +102,30 @@ bool Game::IsGameOver() const
 bool Game::IsPaused() const
 {
     return paused;
+}
+
+int Game::CalculateLevel(int completedLines)
+{
+    if (completedLines <= 0)
+    {
+        return 1;
+    }
+    return completedLines / LinesPerLevel + 1;
+}
+
+int Game::CalculateDropIntervalMs(int level)
+{
+    if (level < 1)
+    {
+        level = 1;
+    }
+
+    int interval = BaseDropIntervalMs - (level - 1) * DropIntervalStepMs;
+    if (interval < MinimumDropIntervalMs)
+    {
+        return MinimumDropIntervalMs;
+    }
+    return interval;
 }
 
 void Game::HandleInput(int key)
@@ -264,11 +312,12 @@ void Game::Reset()
     gameOver = false;
     paused = false;
     score = 0;
+    linesCleared = 0;
 }
 
-void Game::UpdateScore(int LinesCleared, int moveDownPoints)
+void Game::UpdateScore(int linesCompleted, int moveDownPoints)
 {
-    switch (LinesCleared)
+    switch (linesCompleted)
     {
     case 1:
         score += 100;
@@ -286,6 +335,7 @@ void Game::UpdateScore(int LinesCleared, int moveDownPoints)
         break;
     }
 
+    linesCleared += linesCompleted;
     score += moveDownPoints;
 }
 
