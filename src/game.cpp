@@ -64,6 +64,11 @@ std::vector<Position> Game::GetGhostBlockCells() const
     }
 }
 
+std::vector<Position> Game::GetNextBlockCells() const
+{
+    return nextBlock.GetCellPositions();
+}
+
 int Game::GetCurrentBlockId() const
 {
     return currentBlock.id;

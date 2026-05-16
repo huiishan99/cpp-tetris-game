@@ -13,6 +13,7 @@ public:
     const int (&GetGrid() const)[20][10];
     std::vector<Position> GetCurrentBlockCells() const;
     std::vector<Position> GetGhostBlockCells() const;
+    std::vector<Position> GetNextBlockCells() const;
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
     int GetScore() const;

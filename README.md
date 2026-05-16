@@ -14,6 +14,7 @@ no graphics-library setup.
 - Ghost landing preview
 - Pause and resume
 - Soft drop and instant drop
+- Polished dark UI with block preview and status panels
 - Native Windows window rendering
 - Small Windows beep sounds for rotate and row clear
 

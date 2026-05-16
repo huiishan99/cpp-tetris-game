@@ -149,6 +149,12 @@ void TestGhostBlockPreviewIsBelowCurrentBlock()
     Expect(HasSameCells(currentCells, game.GetCurrentBlockCells()), "ghost preview does not move the current block");
 }
 
+void TestNextBlockPreviewHasFourCells()
+{
+    Game game;
+    Expect(game.GetNextBlockCells().size() == 4, "next block preview exposes four cells");
+}
+
 void TestLevelAndDropSpeedProgression()
 {
     Expect(Game::CalculateLevel(0) == 1, "level starts at one");
@@ -168,6 +174,7 @@ int main()
     TestSoftDropScoresOnePoint();
     TestPauseStopsAutomaticDrop();
     TestGhostBlockPreviewIsBelowCurrentBlock();
+    TestNextBlockPreviewHasFourCells();
     TestLevelAndDropSpeedProgression();
 
     std::cout << "All core tests passed." << std::endl;

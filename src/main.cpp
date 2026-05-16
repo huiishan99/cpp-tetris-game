@@ -1,11 +1,12 @@
 #include "game.h"
 #include <windows.h>
 #include <string>
+#include <vector>
 
-const int WINDOW_WIDTH = 520;
-const int WINDOW_HEIGHT = 680;
-const int BOARD_LEFT = 28;
-const int BOARD_TOP = 28;
+const int WINDOW_WIDTH = 600;
+const int WINDOW_HEIGHT = 700;
+const int BOARD_LEFT = 32;
+const int BOARD_TOP = 64;
 const int CELL_SIZE = 28;
 const int TIMER_ID = 1;
 
@@ -34,37 +35,48 @@ COLORREF GetBlockColor(int blockId)
     }
 }
 
-const char *GetBlockName(int blockId)
+COLORREF AdjustColor(COLORREF color, int amount)
 {
-    switch (blockId)
+    int red = GetRValue(color) + amount;
+    int green = GetGValue(color) + amount;
+    int blue = GetBValue(color) + amount;
+
+    if (red < 0)
     {
-    case 1:
-        return "L";
-    case 2:
-        return "J";
-    case 3:
-        return "I";
-    case 4:
-        return "O";
-    case 5:
-        return "S";
-    case 6:
-        return "T";
-    case 7:
-        return "Z";
-    default:
-        return "?";
+        red = 0;
     }
+    if (green < 0)
+    {
+        green = 0;
+    }
+    if (blue < 0)
+    {
+        blue = 0;
+    }
+    if (red > 255)
+    {
+        red = 255;
+    }
+    if (green > 255)
+    {
+        green = 255;
+    }
+    if (blue > 255)
+    {
+        blue = 255;
+    }
+    return RGB(red, green, blue);
 }
 
-void DrawTextLine(HDC hdc, int x, int y, const std::string &text, int size = 24)
+void DrawTextLine(HDC hdc, int x, int y, const std::string &text, int size = 24,
+                  COLORREF color = RGB(238, 238, 228), int weight = FW_NORMAL)
 {
-    HFONT font = CreateFontA(size, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+    HFONT font = CreateFontA(size, 0, 0, 0, weight, FALSE, FALSE, FALSE,
                              ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas");
+                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Segoe UI");
     HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
     SetBkMode(hdc, TRANSPARENT);
-    SetTextColor(hdc, RGB(245, 247, 255));
+    SetTextColor(hdc, color);
     TextOutA(hdc, x, y, text.c_str(), static_cast<int>(text.size()));
     SelectObject(hdc, oldFont);
     DeleteObject(font);
@@ -78,11 +90,56 @@ void FillRectColor(HDC hdc, int left, int top, int right, int bottom, COLORREF c
     DeleteObject(brush);
 }
 
+void FillVerticalGradient(HDC hdc, int left, int top, int right, int bottom,
+                          COLORREF topColor, COLORREF bottomColor)
+{
+    int height = bottom - top;
+    for (int index = 0; index < height; index++)
+    {
+        int red = GetRValue(topColor) + (GetRValue(bottomColor) - GetRValue(topColor)) * index / height;
+        int green = GetGValue(topColor) + (GetGValue(bottomColor) - GetGValue(topColor)) * index / height;
+        int blue = GetBValue(topColor) + (GetBValue(bottomColor) - GetBValue(topColor)) * index / height;
+        FillRectColor(hdc, left, top + index, right, top + index + 1, RGB(red, green, blue));
+    }
+}
+
+void FillRoundRectColor(HDC hdc, int left, int top, int right, int bottom, int radius,
+                        COLORREF fillColor, COLORREF borderColor)
+{
+    HBRUSH brush = CreateSolidBrush(fillColor);
+    HPEN pen = CreatePen(PS_SOLID, 1, borderColor);
+    HGDIOBJ oldBrush = SelectObject(hdc, brush);
+    HGDIOBJ oldPen = SelectObject(hdc, pen);
+
+    RoundRect(hdc, left, top, right, bottom, radius, radius);
+
+    SelectObject(hdc, oldPen);
+    SelectObject(hdc, oldBrush);
+    DeleteObject(pen);
+    DeleteObject(brush);
+}
+
+void DrawCellAt(HDC hdc, int left, int top, int size, int blockId)
+{
+    if (blockId == 0)
+    {
+        FillRoundRectColor(hdc, left + 1, top + 1, left + size - 1, top + size - 1, 5,
+                           RGB(17, 20, 20), RGB(27, 33, 31));
+        return;
+    }
+
+    COLORREF color = GetBlockColor(blockId);
+    FillRoundRectColor(hdc, left + 2, top + 2, left + size - 2, top + size - 2, 7,
+                       color, AdjustColor(color, -55));
+    FillRectColor(hdc, left + 5, top + 5, left + size - 5, top + 9, AdjustColor(color, 38));
+    FillRectColor(hdc, left + 5, top + size - 9, left + size - 5, top + size - 5, AdjustColor(color, -45));
+}
+
 void DrawCell(HDC hdc, int row, int column, int blockId)
 {
     int left = BOARD_LEFT + column * CELL_SIZE;
     int top = BOARD_TOP + row * CELL_SIZE;
-    FillRectColor(hdc, left + 1, top + 1, left + CELL_SIZE - 1, top + CELL_SIZE - 1, GetBlockColor(blockId));
+    DrawCellAt(hdc, left, top, CELL_SIZE, blockId);
 }
 
 void DrawGhostCell(HDC hdc, int row, int column, int blockId)
@@ -90,23 +147,102 @@ void DrawGhostCell(HDC hdc, int row, int column, int blockId)
     int left = BOARD_LEFT + column * CELL_SIZE;
     int top = BOARD_TOP + row * CELL_SIZE;
     COLORREF color = GetBlockColor(blockId);
-    HPEN pen = CreatePen(PS_SOLID, 2, color);
+    HPEN pen = CreatePen(PS_DOT, 1, AdjustColor(color, 30));
     HGDIOBJ oldPen = SelectObject(hdc, pen);
     HGDIOBJ oldBrush = SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
 
-    Rectangle(hdc, left + 5, top + 5, left + CELL_SIZE - 5, top + CELL_SIZE - 5);
+    RoundRect(hdc, left + 6, top + 6, left + CELL_SIZE - 6, top + CELL_SIZE - 6, 6, 6);
 
     SelectObject(hdc, oldBrush);
     SelectObject(hdc, oldPen);
     DeleteObject(pen);
 }
 
+void DrawMetricPanel(HDC hdc, int x, int y, int width, int height,
+                     const std::string &label, const std::string &value)
+{
+    FillRoundRectColor(hdc, x, y, x + width, y + height, 8,
+                       RGB(31, 35, 36), RGB(61, 70, 62));
+    DrawTextLine(hdc, x + 14, y + 10, label, 16, RGB(170, 178, 158), FW_NORMAL);
+    DrawTextLine(hdc, x + 14, y + 32, value, 28, RGB(248, 244, 225), FW_BOLD);
+}
+
+void DrawNextPreview(HDC hdc, int x, int y, int width, int height)
+{
+    FillRoundRectColor(hdc, x, y, x + width, y + height, 8,
+                       RGB(31, 35, 36), RGB(61, 70, 62));
+    DrawTextLine(hdc, x + 14, y + 10, "Next", 16, RGB(170, 178, 158), FW_NORMAL);
+
+    std::vector<Position> cells = game.GetNextBlockCells();
+    int minRow = cells[0].row;
+    int maxRow = cells[0].row;
+    int minColumn = cells[0].column;
+    int maxColumn = cells[0].column;
+    for (Position cell : cells)
+    {
+        if (cell.row < minRow)
+        {
+            minRow = cell.row;
+        }
+        if (cell.row > maxRow)
+        {
+            maxRow = cell.row;
+        }
+        if (cell.column < minColumn)
+        {
+            minColumn = cell.column;
+        }
+        if (cell.column > maxColumn)
+        {
+            maxColumn = cell.column;
+        }
+    }
+
+    const int previewCellSize = 22;
+    int shapeWidth = (maxColumn - minColumn + 1) * previewCellSize;
+    int shapeHeight = (maxRow - minRow + 1) * previewCellSize;
+    int originX = x + (width - shapeWidth) / 2;
+    int originY = y + 44 + (height - 56 - shapeHeight) / 2;
+
+    for (Position cell : cells)
+    {
+        int cellX = originX + (cell.column - minColumn) * previewCellSize;
+        int cellY = originY + (cell.row - minRow) * previewCellSize;
+        DrawCellAt(hdc, cellX, cellY, previewCellSize, game.GetNextBlockId());
+    }
+}
+
+void DrawStatusPanel(HDC hdc, int x, int y, int width)
+{
+    std::string status = "PLAYING";
+    COLORREF statusColor = RGB(122, 214, 176);
+    if (game.IsGameOver())
+    {
+        status = "GAME OVER";
+        statusColor = RGB(240, 101, 95);
+    }
+    else if (game.IsPaused())
+    {
+        status = "PAUSED";
+        statusColor = RGB(241, 194, 100);
+    }
+
+    FillRoundRectColor(hdc, x, y, x + width, y + 78, 8,
+                       RGB(31, 35, 36), RGB(61, 70, 62));
+    DrawTextLine(hdc, x + 14, y + 10, "Status", 16, RGB(170, 178, 158), FW_NORMAL);
+    DrawTextLine(hdc, x + 14, y + 34, status, 24, statusColor, FW_BOLD);
+}
+
 void DrawGame(HDC hdc)
 {
-    FillRectColor(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, RGB(44, 44, 127));
-    FillRectColor(hdc, BOARD_LEFT - 4, BOARD_TOP - 4,
-                  BOARD_LEFT + CELL_SIZE * 10 + 4, BOARD_TOP + CELL_SIZE * 20 + 4,
-                  RGB(18, 22, 32));
+    FillVerticalGradient(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+                         RGB(18, 22, 21), RGB(35, 38, 32));
+    DrawTextLine(hdc, BOARD_LEFT, 20, "TETRIS", 30, RGB(248, 244, 225), FW_BOLD);
+    DrawTextLine(hdc, BOARD_LEFT + 118, 28, "native C++", 14, RGB(154, 164, 145), FW_NORMAL);
+
+    FillRoundRectColor(hdc, BOARD_LEFT - 8, BOARD_TOP - 8,
+                       BOARD_LEFT + CELL_SIZE * 10 + 8, BOARD_TOP + CELL_SIZE * 20 + 8,
+                       10, RGB(12, 15, 15), RGB(67, 76, 66));
 
     int display[20][10];
     const int (&grid)[20][10] = game.GetGrid();
@@ -142,34 +278,20 @@ void DrawGame(HDC hdc)
         }
     }
 
-    int panelX = BOARD_LEFT + CELL_SIZE * 10 + 32;
-    DrawTextLine(hdc, panelX, 34, "TETRIS", 36);
-    DrawTextLine(hdc, panelX, 96, "Score", 24);
-    DrawTextLine(hdc, panelX, 128, std::to_string(game.GetScore()), 32);
-    DrawTextLine(hdc, panelX, 190, "Lines", 22);
-    DrawTextLine(hdc, panelX, 220, std::to_string(game.GetLinesCleared()), 28);
-    DrawTextLine(hdc, panelX + 72, 190, "Level", 22);
-    DrawTextLine(hdc, panelX + 72, 220, std::to_string(game.GetLevel()), 28);
-    DrawTextLine(hdc, panelX, 286, "Next", 24);
-    DrawTextLine(hdc, panelX, 318, GetBlockName(game.GetNextBlockId()), 42);
+    int panelX = BOARD_LEFT + CELL_SIZE * 10 + 34;
+    int panelWidth = WINDOW_WIDTH - panelX - 32;
+    FillRoundRectColor(hdc, panelX - 12, BOARD_TOP - 8,
+                       WINDOW_WIDTH - 24, BOARD_TOP + CELL_SIZE * 20 + 8,
+                       10, RGB(24, 28, 28), RGB(58, 68, 58));
 
-    DrawTextLine(hdc, panelX, 420, "Keys", 22);
-    DrawTextLine(hdc, panelX, 454, "Arrows/WASD", 18);
-    DrawTextLine(hdc, panelX, 482, "Space: drop", 18);
-    DrawTextLine(hdc, panelX, 510, "P: pause", 18);
-    DrawTextLine(hdc, panelX, 538, "Q: quit", 18);
-
-    if (game.IsPaused())
-    {
-        DrawTextLine(hdc, panelX, 590, "PAUSED", 28);
-        DrawTextLine(hdc, panelX, 628, "Press P", 18);
-    }
-
-    if (game.IsGameOver())
-    {
-        DrawTextLine(hdc, panelX, 590, "GAME OVER", 28);
-        DrawTextLine(hdc, panelX, 628, "Press any key", 18);
-    }
+    DrawMetricPanel(hdc, panelX, BOARD_TOP + 10, panelWidth, 86,
+                    "Score", std::to_string(game.GetScore()));
+    DrawMetricPanel(hdc, panelX, BOARD_TOP + 112, (panelWidth - 12) / 2, 78,
+                    "Lines", std::to_string(game.GetLinesCleared()));
+    DrawMetricPanel(hdc, panelX + (panelWidth + 12) / 2, BOARD_TOP + 112,
+                    (panelWidth - 12) / 2, 78, "Level", std::to_string(game.GetLevel()));
+    DrawNextPreview(hdc, panelX, BOARD_TOP + 208, panelWidth, 156);
+    DrawStatusPanel(hdc, panelX, BOARD_TOP + 388, panelWidth);
 }
 
 void HandleGameKey(HWND hwnd, WPARAM key)

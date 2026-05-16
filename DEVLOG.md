@@ -26,6 +26,21 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Polish Win32 game UI
+
+- Changed: Reworked the Win32 drawing style with a wider window, warmer dark
+  background, rounded board/sidebar panels, highlighted block cells, dotted
+  ghost cells, status panel, and a graphical next-block preview.
+- Why: Make the game feel less like a debug sample and more like a finished
+  playable window.
+- Risk: Main GUI rendering changed substantially and could need spacing/color
+  tuning on Windows; Win32 GUI build was not available in this environment.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Open on Windows to tune exact text metrics and color contrast.
+
 ### 2026-05-16 - Add line stats and level speed
 
 - Changed: Added total cleared lines, level calculation, dynamic drop interval,
