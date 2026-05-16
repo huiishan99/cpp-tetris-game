@@ -96,6 +96,11 @@ src/
   blocks.cpp     Individual Tetris block shapes
 ```
 
+## Development Log
+
+Every repository change should include a new entry in `DEVLOG.md`. Record what
+changed, why it changed, the risk, verification steps, and any follow-up work.
+
 ## Troubleshooting
 
 ### Space key does not drop the block
