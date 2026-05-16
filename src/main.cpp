@@ -122,16 +122,23 @@ void DrawGame(HDC hdc)
     int panelX = BOARD_LEFT + CELL_SIZE * 10 + 32;
     DrawTextLine(hdc, panelX, 34, "TETRIS", 36);
     DrawTextLine(hdc, panelX, 96, "Score", 24);
-    DrawTextLine(hdc, panelX, 128, std::to_string(game.score), 32);
+    DrawTextLine(hdc, panelX, 128, std::to_string(game.GetScore()), 32);
     DrawTextLine(hdc, panelX, 204, "Next", 24);
     DrawTextLine(hdc, panelX, 236, GetBlockName(game.GetNextBlockId()), 42);
 
     DrawTextLine(hdc, panelX, 340, "Keys", 22);
     DrawTextLine(hdc, panelX, 374, "Arrows/WASD", 18);
     DrawTextLine(hdc, panelX, 402, "Space: drop", 18);
-    DrawTextLine(hdc, panelX, 430, "Q: quit", 18);
+    DrawTextLine(hdc, panelX, 430, "P: pause", 18);
+    DrawTextLine(hdc, panelX, 458, "Q: quit", 18);
 
-    if (game.gameOver)
+    if (game.IsPaused())
+    {
+        DrawTextLine(hdc, panelX, 520, "PAUSED", 28);
+        DrawTextLine(hdc, panelX, 558, "Press P", 18);
+    }
+
+    if (game.IsGameOver())
     {
         DrawTextLine(hdc, panelX, 520, "GAME OVER", 28);
         DrawTextLine(hdc, panelX, 558, "Press any key", 18);
@@ -168,10 +175,11 @@ void HandleGameKey(HWND hwnd, WPARAM key)
     case 'D':
     case 'S':
     case 'W':
+    case 'P':
         input = static_cast<int>(key);
         break;
     default:
-        input = game.gameOver ? 'r' : 0;
+        input = game.IsGameOver() ? 'r' : 0;
         break;
     }
 

@@ -26,6 +26,21 @@ specific edits.
 
 ## Entries
 
+### 2026-05-16 - Add pause and resume
+
+- Changed: Added paused game state, `P` input handling, paused UI text, accessors
+  for game state, and a core test for paused automatic drop behavior.
+- Why: Improve basic playability and start moving direct state access behind
+  small query methods.
+- Risk: Input flow changed around game-over and paused states; timer still fires
+  but gameplay movement is ignored while paused.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/position.cpp
+  src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Add a visual overlay for pause/game-over states and consider
+  stopping the timer while paused if future frontends need it.
+
 ### 2026-05-16 - Make core logic portable
 
 - Changed: Added `src/sound.h`, `src/sound.cpp`, moved Windows `Beep` calls out

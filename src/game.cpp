@@ -9,6 +9,7 @@ Game::Game()
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
     gameOver = false;
+    paused = false;
     score = 0;
 }
 
@@ -50,14 +51,40 @@ int Game::GetNextBlockId() const
     return nextBlock.id;
 }
 
+int Game::GetScore() const
+{
+    return score;
+}
+
+bool Game::IsGameOver() const
+{
+    return gameOver;
+}
+
+bool Game::IsPaused() const
+{
+    return paused;
+}
+
 void Game::HandleInput(int key)
 {
     if (gameOver && key != 0)
     {
-        gameOver = false;
         Reset();
         return;
     }
+
+    if (key == 'p' || key == 'P')
+    {
+        TogglePause();
+        return;
+    }
+
+    if (paused)
+    {
+        return;
+    }
+
     switch (key)
     {
     case 'a':
@@ -85,7 +112,7 @@ void Game::HandleInput(int key)
 
 void Game::MoveBlockLeft()
 {
-    if (!gameOver)
+    if (!gameOver && !paused)
     {
         currentBlock.Move(0, -1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -97,7 +124,7 @@ void Game::MoveBlockLeft()
 
 void Game::MoveBlockRight()
 {
-    if (!gameOver)
+    if (!gameOver && !paused)
     {
         currentBlock.Move(0, 1);
         if (IsBlockOutside() || BlockFits() == false)
@@ -109,7 +136,7 @@ void Game::MoveBlockRight()
 
 void Game::MoveBlockDown()
 {
-    if (!gameOver)
+    if (!gameOver && !paused)
     {
         currentBlock.Move(1, 0);
         if (IsBlockOutside() || BlockFits() == false)
@@ -122,7 +149,7 @@ void Game::MoveBlockDown()
 
 void Game::DropBlock()
 {
-    if (!gameOver)
+    if (!gameOver && !paused)
     {
         int rowsDropped = 0;
         while (true)
@@ -155,7 +182,7 @@ bool Game::IsBlockOutside()
 
 void Game::RotateBlock()
 {
-    if (!gameOver)
+    if (!gameOver && !paused)
     {
         currentBlock.Rotate();
         if (IsBlockOutside() || BlockFits() == false)
@@ -180,6 +207,7 @@ void Game::LockBlock()
     if (BlockFits() == false)
     {
         gameOver = true;
+        paused = false;
     }
     nextBlock = GetRandomBlock();
     int rowsCleared = grid.ClearFullRows();
@@ -209,6 +237,8 @@ void Game::Reset()
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
+    gameOver = false;
+    paused = false;
     score = 0;
 }
 
@@ -233,4 +263,12 @@ void Game::UpdateScore(int LinesCleared, int moveDownPoints)
     }
 
     score += moveDownPoints;
+}
+
+void Game::TogglePause()
+{
+    if (!gameOver)
+    {
+        paused = !paused;
+    }
 }

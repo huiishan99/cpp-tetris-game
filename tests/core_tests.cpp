@@ -20,6 +20,23 @@ bool HasCell(const std::vector<Position> &cells, int row, int column)
     return false;
 }
 
+bool HasSameCells(const std::vector<Position> &left, const std::vector<Position> &right)
+{
+    if (left.size() != right.size())
+    {
+        return false;
+    }
+
+    for (const Position &cell : left)
+    {
+        if (!HasCell(right, cell.row, cell.column))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Expect(bool condition, const char *message)
 {
     if (!condition)
@@ -83,11 +100,29 @@ void TestBlockRotationCycles()
 void TestSoftDropScoresOnePoint()
 {
     Game game;
-    int startingScore = game.score;
+    int startingScore = game.GetScore();
 
     game.HandleInput('s');
 
-    Expect(game.score == startingScore + 1, "soft drop scores one point");
+    Expect(game.GetScore() == startingScore + 1, "soft drop scores one point");
+}
+
+void TestPauseStopsAutomaticDrop()
+{
+    Game game;
+    std::vector<Position> initialCells = game.GetCurrentBlockCells();
+
+    game.HandleInput('p');
+    game.MoveBlockDown();
+
+    Expect(game.IsPaused(), "pause input toggles paused state on");
+    Expect(HasSameCells(initialCells, game.GetCurrentBlockCells()), "paused game does not auto-drop");
+
+    game.HandleInput('p');
+    game.MoveBlockDown();
+
+    Expect(!game.IsPaused(), "pause input toggles paused state off");
+    Expect(!HasSameCells(initialCells, game.GetCurrentBlockCells()), "unpaused game resumes auto-drop");
 }
 }
 
@@ -97,6 +132,7 @@ int main()
     TestGridClearsMultipleRows();
     TestBlockRotationCycles();
     TestSoftDropScoresOnePoint();
+    TestPauseStopsAutomaticDrop();
 
     std::cout << "All core tests passed." << std::endl;
     return 0;

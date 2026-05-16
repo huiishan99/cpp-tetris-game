@@ -10,6 +10,7 @@ no graphics-library setup.
 - Classic Tetris movement
 - Score tracking
 - Next-block preview
+- Pause and resume
 - Soft drop and instant drop
 - Native Windows window rendering
 - Small Windows beep sounds for rotate and row clear
@@ -23,6 +24,7 @@ no graphics-library setup.
 | Down Arrow or S | Soft drop |
 | Up Arrow or W | Rotate block |
 | Space | Drop block instantly |
+| P | Pause or resume |
 | Any key after game over | Restart |
 | Q | Quit |
 

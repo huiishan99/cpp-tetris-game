@@ -14,8 +14,9 @@ public:
     std::vector<Position> GetCurrentBlockCells();
     int GetCurrentBlockId() const;
     int GetNextBlockId() const;
-    bool gameOver;
-    int score;
+    int GetScore() const;
+    bool IsGameOver() const;
+    bool IsPaused() const;
 
 private:
     void MoveBlockLeft();
@@ -29,9 +30,13 @@ private:
     bool BlockFits();
     void Reset();
     void UpdateScore(int LinesCleared, int moveDownPoints);
+    void TogglePause();
     Grid grid;
     std::vector<Block> blocks;
     Block currentBlock;
     Block nextBlock;
     std::mt19937 randomGenerator;
+    bool gameOver;
+    bool paused;
+    int score;
 };
