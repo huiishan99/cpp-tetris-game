@@ -2,3 +2,4 @@ tetris_highscore.txt
 tetris_highscore_test.tmp
 build/
 cmake-build-*/
+dist/

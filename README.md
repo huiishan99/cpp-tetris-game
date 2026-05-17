@@ -53,6 +53,16 @@ On Windows, open PowerShell in the project folder:
 .\main.exe
 ```
 
+To make a shareable build:
+
+```powershell
+.\package.bat
+```
+
+That creates `dist\tetris-win.zip` with the executable, bundled font, README,
+and runtime DLLs beside the executable. You only need to rebuild or repackage
+after changing the source.
+
 Or build directly with MinGW-w64:
 
 ```powershell

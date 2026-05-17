@@ -26,6 +26,24 @@ specific edits.
 
 ## Entries
 
+### 2026-05-17 - Add Windows packaging script
+
+- Changed: Added `package.bat` to build the game, assemble a `dist\tetris-win`
+  folder, copy the executable, README, font, and runtime DLLs beside the
+  executable, and create `dist\tetris-win.zip` when PowerShell is available.
+  Ignored `dist/` and documented packaging in the README.
+- Why: Let the game be distributed or run from a packaged folder without asking
+  players to rebuild manually.
+- Risk: The script targets Windows batch/PowerShell and could not be executed
+  in this macOS environment; local verification covers repository syntax and
+  portable core tests.
+- Verified: Built with `c++ -std=c++17 -Wall -Wextra -Isrc tests/core_tests.cpp
+  src/block.cpp src/blocks.cpp src/game.cpp src/grid.cpp src/high_score.cpp
+  src/position.cpp src/sound.cpp -o /private/tmp/tetris_core_tests` and ran
+  `/private/tmp/tetris_core_tests`; all core tests passed.
+- Follow-ups: Run `package.bat` on Windows and confirm the zip launches from a
+  clean folder.
+
 ### 2026-05-16 - Rewrite README for players
 
 - Changed: Rewrote `README.md` into a shorter, more player-focused project
